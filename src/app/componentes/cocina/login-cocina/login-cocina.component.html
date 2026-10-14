@@ -1,0 +1,20 @@
+<div class="login">
+    <form class="tarjeta" (ngSubmit)="ingresar()">
+        <h1>Cocina</h1>
+        <p class="subtitulo">Ingresá para ver las comandas</p>
+
+        <label for="usuario">Usuario</label>
+        <input id="usuario" name="usuario" type="text" [(ngModel)]="usuario" (ngModelChange)="error = false"
+            autocomplete="username" required />
+
+        <label for="clave">Contraseña</label>
+        <input id="clave" name="clave" type="password" [(ngModel)]="clave" (ngModelChange)="error = false"
+            autocomplete="current-password" required />
+
+        <p class="error" *ngIf="error">Usuario o contraseña incorrectos</p>
+
+        <button type="submit">Ingresar</button>
+
+        <p class="ayuda">Prueba: cocina / 1234</p>
+    </form>
+</div>
