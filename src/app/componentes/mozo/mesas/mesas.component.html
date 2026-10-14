@@ -1,0 +1,27 @@
+<div class="pagina">
+    <header>
+        <h1>Mesas</h1>
+        <button class="salir" (click)="salir()">Salir</button>
+    </header>
+
+    <ng-container *ngIf="mesas$ | async as mesas">
+        <p class="vacio" *ngIf="mesas.length === 0">Todavía no hay pedidos.</p>
+
+        <div class="mesa" *ngFor="let m of mesas">
+            <div class="mesa-header">
+                <h2>Mesa {{ m.mesaId }}</h2>
+                <strong>{{ m.total | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong>
+            </div>
+
+            <div class="pedido" *ngFor="let p of m.pedidos">
+                <div class="items">
+                    <div *ngFor="let i of p.items">{{ i.cantidad }} x {{ i.nombre }}</div>
+                </div>
+                <div class="estado">
+                    <span class="badge" [class]="p.estado">{{ p.estado }}</span>
+                    <button *ngIf="p.estado === 'listo'" (click)="entregar(p.id)">Entregar</button>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>
