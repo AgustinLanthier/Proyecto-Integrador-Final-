@@ -1,0 +1,28 @@
+<div class="pagina">
+    <header>
+        <h1>Comandas</h1>
+        <button class="salir" (click)="salir()">Salir</button>
+    </header>
+
+    <ng-container *ngIf="comandas$ | async as comandas">
+        <p class="vacio" *ngIf="comandas.length === 0">No hay comandas pendientes.</p>
+
+        <div class="comanda" *ngFor="let c of comandas">
+            <div class="comanda-header">
+                <h2>Mesa {{ c.mesaId }} · #{{ c.id }}</h2>
+                <span class="hora">{{ c.fecha | date:'HH:mm' }}</span>
+            </div>
+
+            <ul>
+                <li *ngFor="let i of c.items">{{ i.cantidad }} x {{ i.nombre }}</li>
+            </ul>
+
+            <div class="acciones">
+                <span class="badge" [class]="c.estado">{{ c.estado }}</span>
+                <button *ngIf="c.estado === 'pendiente'" (click)="preparar(c.id)">Preparar</button>
+                <button *ngIf="c.estado === 'en_preparacion'" class="listo" (click)="listo(c.id)">Plato
+                    preparado</button>
+            </div>
+        </div>
+    </ng-container>
+</div>

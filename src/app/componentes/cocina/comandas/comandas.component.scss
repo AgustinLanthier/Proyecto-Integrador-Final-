@@ -1,0 +1,97 @@
+$color: #ea580c;
+
+.pagina {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+        margin: 0;
+        color: $color;
+    }
+
+    .salir {
+        background: none;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 0.4rem 0.9rem;
+        cursor: pointer;
+    }
+}
+
+.vacio {
+    color: #6b7280;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.comanda {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+    margin-top: 1rem;
+
+    .comanda-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h2 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .hora {
+            color: #6b7280;
+        }
+    }
+
+    ul {
+        margin: 0.75rem 0;
+        padding-left: 1.2rem;
+    }
+}
+
+.acciones {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    button {
+        background: $color;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-weight: 600;
+
+        &.listo {
+            background: #16a34a;
+        }
+    }
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+
+    &.pendiente {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    &.en_preparacion {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+}
