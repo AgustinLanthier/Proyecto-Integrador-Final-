@@ -199,4 +199,5 @@ El proyecto incluye, entre otros, los siguientes diagramas:
 ## 👤 Autor
 
 **Agustín Lanthier**
+
 Proyecto final de carrera.
