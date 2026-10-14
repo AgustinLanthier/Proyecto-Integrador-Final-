@@ -1,0 +1,34 @@
+<div class="pagina">
+    <header>
+        <h1>Mesa {{ mesaId }}</h1>
+        <a [routerLink]="['/cliente', mesaId, 'cuenta']">Ver mi cuenta</a>
+    </header>
+
+    <p class="mensaje" *ngIf="mensaje">{{ mensaje }}</p>
+
+    <ng-container *ngIf="menu$ | async as productos">
+        <section *ngFor="let cat of categorias(productos)">
+            <h2>{{ cat }}</h2>
+
+            <div class="producto" *ngFor="let p of porCategoria(productos, cat)">
+                <div class="info">
+                    <strong>{{ p.nombre }}</strong>
+                    <span class="desc">{{ p.descripcion }}</span>
+                    <span class="precio">{{ p.precio | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+                    <span class="agotado" *ngIf="p.stock === 0">Agotado</span>
+                </div>
+
+                <div class="controles">
+                    <button (click)="quitar(p)" [disabled]="cantidad(p.id) === 0">−</button>
+                    <span>{{ cantidad(p.id) }}</span>
+                    <button (click)="agregar(p)" [disabled]="p.stock === 0 || cantidad(p.id) >= p.stock">+</button>
+                </div>
+            </div>
+        </section>
+    </ng-container>
+
+    <footer *ngIf="cantidadTotal > 0">
+        <span>{{ cantidadTotal }} ítems · {{ total | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+        <button (click)="enviar()">Enviar pedido</button>
+    </footer>
+</div>

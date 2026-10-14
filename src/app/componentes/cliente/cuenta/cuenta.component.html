@@ -1,0 +1,31 @@
+<div class="pagina">
+    <header>
+        <h1>Cuenta · Mesa {{ mesaId }}</h1>
+        <a [routerLink]="['/cliente', mesaId]">Volver a la carta</a>
+    </header>
+
+    <ng-container *ngIf="pedidos$ | async as pedidos">
+        <p class="vacio" *ngIf="pedidos.length === 0">Todavía no pediste nada.</p>
+
+        <div class="pedido" *ngFor="let p of pedidos">
+            <div class="pedido-header">
+                <span>Pedido #{{ p.id }} · {{ p.fecha | date:'HH:mm' }}</span>
+                <span class="badge" [class]="p.estado">{{ p.estado }}</span>
+            </div>
+
+            <div class="item" *ngFor="let i of p.items">
+                <span>{{ i.cantidad }} x {{ i.nombre }}</span>
+                <span>{{ i.precioUnitario * i.cantidad | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+
+            <div class="subtotal">
+                Subtotal: {{ subtotal(p) | currency:'ARS':'symbol-narrow':'1.0-0' }}
+            </div>
+        </div>
+    </ng-container>
+
+    <footer>
+        <span>Total</span>
+        <strong>{{ total$ | async | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong>
+    </footer>
+</div>
