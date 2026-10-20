@@ -17,6 +17,7 @@ import { LoginMozoComponent } from './componentes/mozo/login-mozo/login-mozo.com
 import { ComandasComponent } from './componentes/cocina/comandas/comandas.component';
 import { LoginCocinaComponent } from './componentes/cocina/login-cocina/login-cocina.component';
 import { autenticacionInterceptor } from './interceptores/autenticacion.interceptor';
+import { ModalConfirmacionComponent } from './componentes/compartidos/modal-confirmacion/modal-confirmacion.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { autenticacionInterceptor } from './interceptores/autenticacion.intercep
     LoginMozoComponent,
     ComandasComponent,
     LoginCocinaComponent,
+    ModalConfirmacionComponent,
   ],
   imports: [BrowserModule, FormsModule, AppRoutingModule],
   providers: [provideHttpClient(withInterceptors([autenticacionInterceptor]))],

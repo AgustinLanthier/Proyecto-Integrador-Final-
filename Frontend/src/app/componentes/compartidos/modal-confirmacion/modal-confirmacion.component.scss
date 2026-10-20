@@ -1,0 +1,77 @@
+$marron-oscuro: rgb(101, 67, 33);
+$marron-cafe: rgb(111, 78, 55);
+$marron-beige: rgb(245, 245, 220);
+$marron-trigo: rgb(245, 222, 179);
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(40, 25, 10, 0.6);
+  backdrop-filter: blur(3px);
+  animation: fundir 0.2s ease;
+}
+
+.modal {
+  width: 100%;
+  max-width: 380px;
+  padding: 1.5rem;
+  text-align: center;
+  background: $marron-beige;
+  color: $marron-oscuro;
+  border: 3px solid $marron-oscuro;
+  border-radius: 16px;
+  box-shadow: 0 0 0 6px $marron-trigo, 0 12px 40px rgba(0, 0, 0, 0.4);
+  animation: subir 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  .logo { width: 56px; height: auto; margin-bottom: 0.25rem; }
+
+  h2 {
+    margin: 0 0 0.5rem;
+    font-family: 'Alfa Slab One', serif;
+    font-weight: 400;
+    font-size: 1.4rem;
+  }
+
+  p { margin: 0 0 1.25rem; line-height: 1.4; }
+}
+
+.acciones {
+  display: flex;
+  gap: 0.6rem;
+
+  button {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .principal {
+    background: $marron-cafe;
+    color: $marron-beige;
+    border: 2px solid $marron-cafe;
+    &:hover { background: $marron-oscuro; }
+  }
+
+  .secundario {
+    background: transparent;
+    color: $marron-oscuro;
+    border: 2px solid $marron-oscuro;
+    &:hover { background: $marron-trigo; }
+  }
+}
+
+@keyframes fundir { from { opacity: 0; } }
+@keyframes subir { from { opacity: 0; transform: translateY(16px) scale(0.95); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fondo, .modal { animation: none; }
+}

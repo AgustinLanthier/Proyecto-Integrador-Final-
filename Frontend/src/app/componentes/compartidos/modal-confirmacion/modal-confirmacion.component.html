@@ -1,0 +1,13 @@
+<div class="fondo" *ngIf="visible" (click)="cancelar.emit()">
+  <div class="modal" role="dialog" aria-modal="true" [attr.aria-label]="titulo"
+       (click)="$event.stopPropagation()">
+    <img class="logo" src="logo.svg" alt="" />
+    <h2>{{ titulo }}</h2>
+    <p>{{ mensaje }}</p>
+
+    <div class="acciones">
+      <button class="secundario" (click)="cancelar.emit()">{{ textoCancelar }}</button>
+      <button class="principal" (click)="confirmar.emit()">{{ textoConfirmar }}</button>
+    </div>
+  </div>
+</div>

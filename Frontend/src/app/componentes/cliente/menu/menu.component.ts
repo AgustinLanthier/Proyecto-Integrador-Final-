@@ -5,6 +5,7 @@ import { Producto } from '../../../modelos/producto.model';
 import { ItemPedido } from '../../../modelos/pedido.model';
 import { MenuService } from '../../../servicios/menu.service';
 import { PedidoService } from '../../../servicios/pedido.service';
+import { CuentaService } from '../../../servicios/cuenta.service';
 
 @Component({
   selector: 'app-menu',
@@ -21,7 +22,8 @@ export class MenuComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private menuService: MenuService,
-    private pedidoService: PedidoService
+    private pedidoService: PedidoService,
+    private cuentaService: CuentaService
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +75,11 @@ export class MenuComponent implements OnInit {
   }
 
   enviar(): void {
+    if (this.cuentaService.estaSolicitada(this.mesaId)) {
+      this.mensaje = 'Ya pediste la cuenta, no se pueden agregar más pedidos.';
+      setTimeout(() => (this.mensaje = ''), 3000);
+      return;
+    }
     if (this.carrito.length === 0) return;
     const ok = this.pedidoService.crearPedido(this.mesaId, this.carrito);
     if (ok) {

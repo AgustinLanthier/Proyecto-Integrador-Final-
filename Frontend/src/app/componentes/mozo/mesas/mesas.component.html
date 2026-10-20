@@ -5,23 +5,92 @@
     </header>
 
     <ng-container *ngIf="mesas$ | async as mesas">
-        <p class="vacio" *ngIf="mesas.length === 0">Todavía no hay pedidos.</p>
-
-        <div class="mesa" *ngFor="let m of mesas">
-            <div class="mesa-header">
-                <h2>Mesa {{ m.mesaId }}</h2>
-                <strong>{{ m.total | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong>
+        <main>
+            <!-- Todas las mesas -->
+            <div class="grilla" *ngIf="!seleccionada(mesas); else detalle">
+                <button class="mesa" *ngFor="let m of mesas" [class.ocupada]="m.mesa.ocupada"
+                    [class.cuenta]="m.cuentaPedida" (click)="abrir(m.mesa.id)">
+                    <span class="numero">{{ m.mesa.numero }}</span>
+                    <span class="estado" *ngIf="m.cuentaPedida">🔔 Pidió la cuenta</span>
+                    <span class="estado" *ngIf="!m.cuentaPedida">{{ m.mesa.ocupada ? 'Ocupada' : 'Libre' }}</span>
+                    <span class="monto" *ngIf="m.mesa.ocupada">
+                        {{ m.total | currency:'ARS':'symbol-narrow':'1.0-0' }}
+                    </span>
+                </button>
             </div>
 
-            <div class="pedido" *ngFor="let p of m.pedidos">
-                <div class="items">
-                    <div *ngFor="let i of p.items">{{ i.cantidad }} x {{ i.nombre }}</div>
+            <!-- Pedido actual de la mesa elegida -->
+            <ng-template #detalle>
+                <div class="detalle" *ngIf="seleccionada(mesas) as s">
+                    <button class="volver" (click)="volver()">← Volver a las mesas</button>
+                    <h2>Mesa {{ s.mesa.numero }}</h2>
+
+                    <p class="aviso" *ngIf="s.cuentaPedida">
+                        🔔 El cliente pidió la cuenta. Llevásela a la mesa y cobrá.
+                    </p>
+                    <p class="vacio" *ngIf="s.pedidos.length === 0">Esta mesa no tiene pedidos.</p>
+
+                    <div class="pedido" *ngFor="let p of s.pedidos">
+                        <div class="pedido-header">
+                            <span>Pedido #{{ p.id }} · {{ p.fecha | date:'HH:mm' }}</span>
+                            <span class="badge" [class]="p.estado">{{ p.estado }}</span>
+                        </div>
+
+                        <div class="item" *ngFor="let i of p.items">
+                            <span>{{ i.cantidad }} x {{ i.nombre }}</span>
+                            <span>{{ i.precioUnitario * i.cantidad | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+                        </div>
+
+                        <button class="entregar" *ngIf="p.estado === 'listo'" (click)="entregar(p.id)">
+                            Entregar
+                        </button>
+                    </div>
                 </div>
-                <div class="estado">
-                    <span class="badge" [class]="p.estado">{{ p.estado }}</span>
-                    <button *ngIf="p.estado === 'listo'" (click)="entregar(p.id)">Entregar</button>
-                </div>
+            </ng-template>
+        </main>
+
+        <footer>
+            <ng-container *ngIf="seleccionada(mesas) as s">
+                <ng-container *ngIf="s.pedidos.length > 0">
+                    <div class="total">
+                        <span>Total mesa {{ s.mesa.numero }}</span>
+                        <strong>{{ s.total | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong>
+                    </div>
+                    <button class="pagar" (click)="pagar(s)">A pagar</button>
+                </ng-container>
+            </ng-container>
+        </footer>
+    </ng-container>
+
+    <!-- Ticket -->
+    <div class="overlay" *ngIf="ticket as t">
+        <div class="ticket">
+            <h2>Pingo</h2>
+            <p class="centro">Ticket #{{ t.numero | number:'4.0-0' }}</p>
+            <p class="centro">Mesa {{ t.mesaId }} · {{ t.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+            <hr />
+
+            <div class="linea" *ngFor="let i of t.items">
+                <span>{{ i.cantidad }} x {{ i.nombre }}</span>
+                <span>{{ i.precioUnitario * i.cantidad | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+
+            <hr />
+            <div class="linea total-ticket">
+                <span>TOTAL</span>
+                <span>{{ t.total | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <p class="centro gracias">¡Gracias por su visita!</p>
+
+            <div class="acciones no-imprimir">
+                <button (click)="imprimir()">Imprimir</button>
+                <button class="secundario" (click)="cerrarTicket()">Cerrar</button>
             </div>
         </div>
-    </ng-container>
+    </div>
+    <app-modal-confirmacion [visible]="confirmandoMesaId !== null" titulo="Pedidos sin entregar"
+        [mensaje]="'La mesa ' + confirmandoMesaId + ' todavía tiene pedidos sin entregar. ¿Querés cobrar igual?'"
+        textoConfirmar="Cobrar igual" textoCancelar="Volver" (confirmar)="confirmarCobro()"
+        (cancelar)="cancelarCobro()">
+    </app-modal-confirmacion>
 </div>

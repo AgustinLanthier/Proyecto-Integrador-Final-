@@ -1,20 +1,27 @@
 <div class="login">
-    <form class="tarjeta" (ngSubmit)="ingresar()">
-        <h1>Mozo</h1>
-        <p class="subtitulo">Ingresá para ver tus mesas</p>
+  <div class="splash" aria-hidden="true">
+    <div class="logo-wrap">
+        <img class="logo" src="logo.svg" alt="" />
+    </div>
+    <p class="nombre">Pinta Alce</p>
+  </div>
 
-        <label for="usuario">Usuario</label>
-        <input id="usuario" name="usuario" type="text" [(ngModel)]="usuario" (ngModelChange)="error = false"
-            autocomplete="username" required />
+  <form class="tarjeta" (ngSubmit)="ingresar()">
+    <h1>Mozo</h1>
+    <p class="subtitulo">Ingresá para ver tus mesas</p>
 
-        <label for="clave">Contraseña</label>
-        <input id="clave" name="clave" type="password" [(ngModel)]="clave" (ngModelChange)="error = false"
-            autocomplete="current-password" required />
+    <label for="usuario">Usuario</label>
+    <input id="usuario" name="usuario" type="text" [(ngModel)]="usuario"
+           (ngModelChange)="error = false" autocomplete="username" required />
 
-        <p class="error" *ngIf="error">Usuario o contraseña incorrectos</p>
+    <label for="clave">Contraseña</label>
+    <input id="clave" name="clave" type="password" [(ngModel)]="clave"
+           (ngModelChange)="error = false" autocomplete="current-password" required />
 
-        <button type="submit">Ingresar</button>
+    <p class="error" *ngIf="error">Usuario o contraseña incorrectos</p>
 
-        <p class="ayuda">Prueba: mozo / 1234</p>
-    </form>
+    <button type="submit">Ingresar</button>
+
+    <p class="ayuda">Prueba: mozo / 1234</p>
+  </form>
 </div>

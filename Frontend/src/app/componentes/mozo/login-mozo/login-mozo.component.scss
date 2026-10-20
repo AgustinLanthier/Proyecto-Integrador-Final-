@@ -1,24 +1,151 @@
-$color: #2563eb;
+$marron-oscuro: rgb(101, 67, 33);
+$marron-cafe: rgb(111, 78, 55);
+$marron-comun: rgb(150, 75, 0);
+$marron-canela: rgb(210, 105, 30);
+$marron-camello: rgb(193, 154, 107);
+$marron-trigo: rgb(245, 222, 179);
+$marron-beige: rgb(245, 245, 220);
+$marron-bronceado: rgb(210, 180, 140);
+
+$color: $marron-cafe;
+$fondo: $marron-bronceado;
+
+// Tiempos de la secuencia
+$t-entrada: 1.6s; // crece y da la vuelta
+$t-parpadeo-inicio: 2s; // empieza a parpadear
+$t-parpadeo: 0.9s; // dura el parpadeo
+$t-nombre-inicio: 2.9s; // se abre el nombre
+$t-nombre: 0.4s;
+$t-salida-inicio: 4.4s; // se va la pantalla de carga
+$t-salida: 0.5s;
+$t-login-inicio: 4.6s; // aparece el login
 
 .login {
+    position: relative;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f3f4f6;
+    font-family: 'Alfa Slab One', serif;
+    background: $fondo;
     padding: 1rem;
+    &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: $fondo URL('/patron-birras.svg');  
+    background-size: 72px 72px;
+    opacity: 0.5;
+    pointer-events: none;
+    }
 }
 
+// ---------- Pantalla de carga ----------
+.splash {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $fondo;
+    animation: splash-salida $t-salida ease $t-salida-inicio forwards;
+}
+
+.logo-wrap {
+    position: absolute;
+    animation: entrada $t-entrada cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.logo {
+    display: block;
+    width: min(65vw, 20rem);
+    height: auto;
+    animation: parpadeo $t-parpadeo ease-in-out $t-parpadeo-inicio forwards;
+}
+
+.nombre {
+    position: absolute;
+    font-family: 'Castellar', serif;
+    margin: 0;
+    padding: 0 1rem;
+    text-align: center;
+    font-size: 5rem;
+    font-weight: 700;
+    color: $color;
+    animation: abrir $t-nombre ease-out $t-nombre-inicio both;
+}
+
+@keyframes entrada {
+    from {
+        transform: perspective(800px) scale(0.1) rotateY(0deg);
+        opacity: 0;
+    }
+
+    to {
+        transform: perspective(800px) scale(1) rotateY(360deg);
+        opacity: 1;
+    }
+}
+
+@keyframes parpadeo {
+    0% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+
+    25% {
+        transform: scaleY(0.05);
+    }
+
+    50% {
+        transform: scaleY(1);
+    }
+
+    75% {
+        transform: scaleY(0.05);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scaleY(0.05);
+        opacity: 0;
+    }
+}
+
+@keyframes abrir {
+    from {
+        transform: scaleY(0.05);
+        opacity: 0;
+    }
+
+    to {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+@keyframes splash-salida {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+// ---------- Login ----------
 .tarjeta {
+    position:relative;
+    z-index: 1;
     width: 100%;
     max-width: 360px;
-    background: #fff;
+    background: $marron-beige;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    animation: aparecer 0.6s ease $t-login-inicio both;
 
     h1 {
         margin: 0;
@@ -27,13 +154,13 @@ $color: #2563eb;
 
     .subtitulo {
         margin: 0 0 1rem;
-        color: #6b7280;
+        color: $marron-camello;
     }
 
     label {
         font-size: 0.85rem;
         font-weight: 600;
-        color: #374151;
+        color: $marron-canela;
     }
 
     input {
@@ -42,6 +169,7 @@ $color: #2563eb;
         border-radius: 8px;
         font-size: 1rem;
         margin-bottom: 0.5rem;
+        font-family:"Bernard MT Condensed", "Arial Black", Impact, sans-serif;
 
         &:focus {
             outline: 2px solid $color;
@@ -76,5 +204,30 @@ $color: #2563eb;
         color: #9ca3af;
         font-size: 0.8rem;
         margin: 0.5rem 0 0;
+    }
+}
+
+@keyframes aparecer {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+        visibility: hidden;
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+        visibility: visible;
+    }
+}
+
+// Accesibilidad: sin animación para quien la desactiva en su sistema
+@media (prefers-reduced-motion: reduce) {
+    .splash {
+        display: none;
+    }
+
+    .tarjeta {
+        animation: none;
     }
 }

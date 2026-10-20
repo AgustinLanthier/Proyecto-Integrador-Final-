@@ -25,7 +25,22 @@
     </ng-container>
 
     <footer>
-        <span>Total</span>
-        <strong>{{ total$ | async | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong>
+        <div class="total">
+            <span>Total</span>
+            <strong>{{ total$ | async | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+
+        <p class="aviso" *ngIf="solicitada$ | async; else boton">
+            ✔ Cuenta solicitada. El mozo ya va para tu mesa.
+        </p>
+        <ng-template #boton>
+            <button (click)="pedirCuenta()" [disabled]="(pedidos$ | async)?.length === 0">
+                Pedir la cuenta
+            </button>
+        </ng-template>
     </footer>
+    <app-modal-confirmacion [visible]="confirmando" titulo="Pedir la cuenta"
+        mensaje="Un mozo te la va a llevar a la mesa." textoConfirmar="Sí, pedir cuenta" textoCancelar="Todavía no"
+        (confirmar)="confirmarPedido()" (cancelar)="confirmando = false">
+    </app-modal-confirmacion>
 </div>
