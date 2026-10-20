@@ -5,13 +5,17 @@
   "main": "index.js",
   "scripts": {
     "dev": "bun --watch src/server.js",
-    "start": "bun src/server.js"
+    "start": "bun src/server.js",
+    "seed": "bun src/semilla/index.js"
   },
   "keywords": [],
   "type": "module",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
     "mysql2": "^3.24.6"
   }
 }
