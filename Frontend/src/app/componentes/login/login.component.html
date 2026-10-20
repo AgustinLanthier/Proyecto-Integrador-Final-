@@ -1,0 +1,23 @@
+<div class="login">
+  <div class="splash">
+    <div class="logo-wrap">
+      <img class="logo" src="/logo.svg" alt="Logo">
+    </div>
+    <h1 class="nombre">Pinta Alce</h1>
+  </div>
+
+  <div class="tarjeta">
+    <h1>Ingresar</h1>
+    <p class="subtitulo">Accedé con tu usuario</p>
+
+    <label for="usuario">Usuario</label>
+    <input id="usuario" [(ngModel)]="usuario" name="usuario" (keyup.enter)="ingresar()">
+
+    <label for="clave">Clave</label>
+    <input id="clave" type="password" [(ngModel)]="clave" name="clave" (keyup.enter)="ingresar()">
+
+    @if (error) { <p class="error">{{ error }}</p> }
+
+    <button (click)="ingresar()">Ingresar</button>
+  </div>
+</div>

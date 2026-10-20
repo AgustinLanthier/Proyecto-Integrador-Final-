@@ -1,0 +1,83 @@
+<h2>Administración</h2>
+<button (click)="auth.logout()">Cerrar sesión</button>
+
+<h2>Carta</h2>
+<div>
+    <input [(ngModel)]="nuevo.nombre" name="n-nombre" placeholder="Nombre">
+    <input [(ngModel)]="nuevo.descripcion" name="n-desc" placeholder="Descripción">
+    <input [(ngModel)]="nuevo.categoria" name="n-cat" placeholder="Categoría">
+    <input [(ngModel)]="nuevo.precio" name="n-precio" type="number" placeholder="Precio">
+    <input [(ngModel)]="nuevo.stock" name="n-stock" type="number" placeholder="Stock">
+    <button (click)="agregarProducto()">Agregar</button>
+    @if (errorCarta) { <p class="error">{{ errorCarta }}</p> }
+</div>
+
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Categoría</th>
+        <th>Precio</th>
+        <th>Stock</th>
+        <th></th>
+    </tr>
+    @for (p of productos; track p.id) {
+    <tr>
+        <td><input [(ngModel)]="p.nombre" name="nombre-{{ p.id }}"></td>
+        <td><input [(ngModel)]="p.descripcion" name="desc-{{ p.id }}"></td>
+        <td><input [(ngModel)]="p.categoria" name="cat-{{ p.id }}"></td>
+        <td><input [(ngModel)]="p.precio" name="precio-{{ p.id }}" type="number"></td>
+        <td><input [(ngModel)]="p.stock" name="stock-{{ p.id }}" type="number"></td>
+        <td>
+            <button (click)="guardarProducto(p)">Guardar</button>
+            <button (click)="eliminarProducto(p.id)">Eliminar</button>
+        </td>
+    </tr>
+    }
+</table>
+<h2>Mesas</h2>
+<div>
+    <button (click)="agregarMesa()">Agregar mesa</button>
+    @for (m of mesas; track m.id) {
+    <span>Mesa {{ m.numero }} <button (click)="eliminarMesa(m.id)">Quitar</button></span>
+    }
+    @if (errorMesas) { <p class="error">{{ errorMesas }}</p> }
+</div>
+
+<h2>Usuarios</h2>
+<div>
+    <input [(ngModel)]="nombre" name="nombre" placeholder="Nombre">
+    <input [(ngModel)]="usuario" name="usuario" placeholder="Usuario">
+    <input [(ngModel)]="clave" name="clave" type="password" placeholder="Clave">
+    <select [(ngModel)]="rol" name="rol">
+        <option value="mozo">Mozo</option>
+        <option value="cocina">Cocina</option>
+        <option value="admin">Admin</option>
+    </select>
+    <button (click)="crear()">Crear</button>
+    @if (error) { <p class="error">{{ error }}</p> }
+</div>
+
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>Usuario</th>
+        <th>Rol</th>
+        <th></th>
+    </tr>
+    @for (u of usuarios; track u.id) {
+    <tr>
+        <td>{{ u.nombre }}</td>
+        <td>{{ u.usuario }}</td>
+        <td>{{ u.rol }}</td>
+        <td>
+            @if (u.rol !== 'admin') {
+            <input type="password" [(ngModel)]="clavesNuevas[u.id]" name="clave-{{ u.id }}" placeholder="Nueva clave">
+            <button (click)="cambiarClave(u.id)">Cambiar clave</button>
+            }
+            <button (click)="eliminar(u.id)">Eliminar</button>
+        </td>
+    </tr>
+    }
+    @if (errorClave) { <p class="error">{{ errorClave }}</p> }
+</table>

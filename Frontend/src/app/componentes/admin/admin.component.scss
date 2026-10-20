@@ -1,0 +1,89 @@
+$marron-cafe: rgb(111, 78, 55);
+$marron-canela: rgb(210, 105, 30);
+$marron-camello: rgb(193, 154, 107);
+$marron-beige: rgb(245, 245, 220);
+$marron-bronceado: rgb(210, 180, 140);
+
+$color: $marron-cafe;
+$fondo: $marron-bronceado;
+
+:host {
+    display: block;
+    min-height: 100vh;
+    padding: 1rem;
+    background: $fondo;
+    font-family: 'Alfa Slab One', serif;
+    color: $color;
+}
+
+h2 {
+    margin: 0 0 1rem;
+}
+
+button {
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: $color;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+        filter: brightness(1.1);
+    }
+}
+
+div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: $marron-beige;
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+input,
+select {
+    padding: 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+
+    &:focus {
+        outline: 2px solid $color;
+        border-color: transparent;
+    }
+}
+
+.error {
+    width: 100%;
+    margin: 0;
+    color: #dc2626;
+    font-size: 0.85rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: $marron-beige;
+    border-radius: 12px;
+    overflow: hidden;
+
+    th {
+        background: $marron-camello;
+        color: #fff;
+        text-align: left;
+    }
+
+    th,
+    td {
+        padding: 0.7rem;
+    }
+
+    tr+tr td {
+        border-top: 1px solid $marron-bronceado;
+    }
+}

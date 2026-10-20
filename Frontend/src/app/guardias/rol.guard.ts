@@ -10,5 +10,6 @@ export const rolGuard: CanActivateFn = (route) => {
 
   if (auth.tieneRol(rolRequerido)) return true;
 
-  return router.createUrlTree([rolRequerido === 'cocina' ? '/cocina/login' : '/mozo/login']);
+  const actual = auth.usuarioActual;
+  return router.createUrlTree([actual ? auth.rutaPorRol(actual.rol) : '/login']);
 };

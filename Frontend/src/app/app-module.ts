@@ -13,11 +13,11 @@ import { App } from './app';
 import { MenuComponent } from './componentes/cliente/menu/menu.component';
 import { CuentaComponent } from './componentes/cliente/cuenta/cuenta.component';
 import { MesasComponent } from './componentes/mozo/mesas/mesas.component';
-import { LoginMozoComponent } from './componentes/mozo/login-mozo/login-mozo.component';
 import { ComandasComponent } from './componentes/cocina/comandas/comandas.component';
-import { LoginCocinaComponent } from './componentes/cocina/login-cocina/login-cocina.component';
 import { autenticacionInterceptor } from './interceptores/autenticacion.interceptor';
 import { ModalConfirmacionComponent } from './componentes/compartidos/modal-confirmacion/modal-confirmacion.component';
+import { LoginComponent } from './componentes/login/login.component';
+import { AdminComponent } from './componentes/admin/admin.component';
 
 @NgModule({
   declarations: [
@@ -25,10 +25,10 @@ import { ModalConfirmacionComponent } from './componentes/compartidos/modal-conf
     MenuComponent,
     CuentaComponent,
     MesasComponent,
-    LoginMozoComponent,
     ComandasComponent,
-    LoginCocinaComponent,
     ModalConfirmacionComponent,
+    LoginComponent,
+    AdminComponent,
   ],
   imports: [BrowserModule, FormsModule, AppRoutingModule],
   providers: [provideHttpClient(withInterceptors([autenticacionInterceptor]))],

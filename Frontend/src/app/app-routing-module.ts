@@ -3,9 +3,9 @@ import { RouterModule, Routes } from '@angular/router';
 import { MenuComponent } from './componentes/cliente/menu/menu.component';
 import { CuentaComponent } from './componentes/cliente/cuenta/cuenta.component';
 import { MesasComponent } from './componentes/mozo/mesas/mesas.component';
-import { LoginMozoComponent } from './componentes/mozo/login-mozo/login-mozo.component';
 import { ComandasComponent } from './componentes/cocina/comandas/comandas.component';
-import { LoginCocinaComponent } from './componentes/cocina/login-cocina/login-cocina.component';
+import { LoginComponent } from './componentes/login/login.component';
+import { AdminComponent } from './componentes/admin/admin.component';
 import { autenticacionGuard } from './guardias/autenticacion.guard';
 import { rolGuard } from './guardias/rol.guard';
 
@@ -14,26 +14,15 @@ const routes: Routes = [
   { path: 'cliente/:mesaId', component: MenuComponent },
   { path: 'cliente/:mesaId/cuenta', component: CuentaComponent },
 
-  // Mozo
-  { path: 'mozo/login', component: LoginMozoComponent },
-  {
-    path: 'mozo',
-    component: MesasComponent,
-    canActivate: [autenticacionGuard, rolGuard],
-    data: { rol: 'mozo' },
-  },
+  // Login universal
+  { path: 'login', component: LoginComponent },
 
-  // Cocina
-  { path: 'cocina/login', component: LoginCocinaComponent },
-  {
-    path: 'cocina',
-    component: ComandasComponent,
-    canActivate: [autenticacionGuard, rolGuard],
-    data: { rol: 'cocina' },
-  },
+  { path: 'mozo', component: MesasComponent, canActivate: [autenticacionGuard, rolGuard], data: { rol: 'mozo' } },
+  { path: 'cocina', component: ComandasComponent, canActivate: [autenticacionGuard, rolGuard], data: { rol: 'cocina' } },
+  { path: 'admin', component: AdminComponent, canActivate: [autenticacionGuard, rolGuard], data: { rol: 'admin' } },
 
-  { path: '', redirectTo: 'mozo', pathMatch: 'full' },
-  { path: '**', redirectTo: 'mozo' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' },
 ];
 
 @NgModule({
