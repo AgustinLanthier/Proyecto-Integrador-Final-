@@ -6,7 +6,7 @@ import { API } from '../configuracion/api';
 
 export const autenticacionInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const token = (JSON.parse(localStorage.getItem('sesion') ?? 'null') as { token?: string } | null)?.token;
+  const token = (JSON.parse(sessionStorage.getItem('sesion') ?? 'null') as { token?: string } | null)?.token;
 
   const peticion =
     token && req.url.startsWith(API)
@@ -16,7 +16,7 @@ export const autenticacionInterceptor: HttpInterceptorFn = (req, next) => {
   return next(peticion).pipe(
     catchError((e: HttpErrorResponse) => {
       if (e.status === 401 && token && !req.url.endsWith('/auth/login')) {
-        localStorage.removeItem('sesion');
+        sessionStorage.removeItem('sesion');
         router.navigate(['/login']);
       }
       return throwError(() => e);

@@ -1,7 +1,7 @@
 <div class="pagina">
     <header>
         <h1>Cuenta · Mesa {{ mesaId }}</h1>
-        <a [routerLink]="['/cliente', mesaId]">Volver a la carta</a>
+        <a [routerLink]="['/cliente', mesaId, 'carta']">Volver a la carta</a>
     </header>
     <p class="vacio" *ngIf="error">{{ error }}</p>
     <ng-container *ngIf="cuenta$ | async as cuenta">

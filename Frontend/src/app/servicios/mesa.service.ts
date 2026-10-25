@@ -10,6 +10,7 @@ const aVista = (m: MesaApi): MesaVista => ({
   pedidos: m.pedidos,
   total: m.total,
   cuentaPedida: m.cuentaPedida,
+  nombreCliente: m.nombreCliente,
 });
 
 @Injectable({ providedIn: 'root' })

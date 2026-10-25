@@ -6,13 +6,17 @@ import { MesasComponent } from './componentes/mozo/mesas/mesas.component';
 import { ComandasComponent } from './componentes/cocina/comandas/comandas.component';
 import { LoginComponent } from './componentes/login/login.component';
 import { AdminComponent } from './componentes/admin/admin.component';
+import { BienvenidaComponent } from './componentes/cliente/bienvenida/bienvenida.component';
+
+import { clienteGuard } from './guardias/cliente.guard';
 import { autenticacionGuard } from './guardias/autenticacion.guard';
 import { rolGuard } from './guardias/rol.guard';
 
 const routes: Routes = [
   // Cliente (sin login, entra por QR)
-  { path: 'cliente/:mesaId', component: MenuComponent },
-  { path: 'cliente/:mesaId/cuenta', component: CuentaComponent },
+  { path: 'cliente/:mesaId', component: BienvenidaComponent },
+  { path: 'cliente/:mesaId/carta', component: MenuComponent, canActivate: [clienteGuard] },
+  { path: 'cliente/:mesaId/cuenta', component: CuentaComponent, canActivate: [clienteGuard] },
 
   // Login universal
   { path: 'login', component: LoginComponent },

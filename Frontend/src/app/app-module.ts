@@ -18,6 +18,7 @@ import { autenticacionInterceptor } from './interceptores/autenticacion.intercep
 import { ModalConfirmacionComponent } from './componentes/compartidos/modal-confirmacion/modal-confirmacion.component';
 import { LoginComponent } from './componentes/login/login.component';
 import { AdminComponent } from './componentes/admin/admin.component';
+import { BienvenidaComponent } from './componentes/cliente/bienvenida/bienvenida.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { AdminComponent } from './componentes/admin/admin.component';
     ModalConfirmacionComponent,
     LoginComponent,
     AdminComponent,
+    BienvenidaComponent,
   ],
   imports: [BrowserModule, FormsModule, AppRoutingModule],
   providers: [provideHttpClient(withInterceptors([autenticacionInterceptor]))],

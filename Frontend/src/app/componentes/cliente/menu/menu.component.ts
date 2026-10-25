@@ -6,6 +6,7 @@ import { ItemPedido } from '../../../modelos/pedido.model';
 import { MenuService } from '../../../servicios/menu.service';
 import { PedidoService } from '../../../servicios/pedido.service';
 import { mensajeDeError } from '../../../utilidades/errores';
+import { ClienteService } from '../../../servicios/cliente.service';
 
 @Component({
   selector: 'app-menu',
@@ -17,17 +18,20 @@ export class MenuComponent implements OnInit {
   mesaId = 0;
   menu$!: Observable<Producto[]>;
   carrito: ItemPedido[] = [];
+  nombre = '';
   mensaje = '';
   enviando = false;
 
   constructor(
     private route: ActivatedRoute,
     private menuService: MenuService,
-    private pedidoService: PedidoService
+    private pedidoService: PedidoService,
+    private cliente: ClienteService
   ) {}
 
-  ngOnInit(): void {
+    ngOnInit(): void {
     this.mesaId = Number(this.route.snapshot.paramMap.get('mesaId'));
+    this.nombre = this.cliente.nombre(this.mesaId) ?? '';
     this.menu$ = this.menuService.menu$;
   }
 
@@ -73,7 +77,7 @@ export class MenuComponent implements OnInit {
     if (this.carrito.length === 0 || this.enviando) return;
     this.enviando = true;
 
-    this.pedidoService.crearPedido(this.mesaId, this.carrito).subscribe({
+    this.pedidoService.crearPedido(this.mesaId, this.carrito, this.nombre).subscribe({
       next: () => {
         this.carrito = [];
         this.enviando = false;

@@ -26,7 +26,7 @@ $t-login-inicio: 4.6s; // aparece el login
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Alfa Slab One', serif;
+    font-family: "JetBrains Mono", monospace;
     background: $fondo;
     padding: 1rem;
     &::before {
@@ -160,7 +160,7 @@ $t-login-inicio: 4.6s; // aparece el login
     label {
         font-size: 0.85rem;
         font-weight: 600;
-        color: $marron-canela;
+        color: black;
     }
 
     input {

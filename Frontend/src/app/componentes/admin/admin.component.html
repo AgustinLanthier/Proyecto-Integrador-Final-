@@ -1,83 +1,149 @@
-<h2>Administración</h2>
-<button (click)="auth.logout()">Cerrar sesión</button>
+<header class="no-imprimir">
+    <h1>Administración</h1>
+    <button class="secundario" (click)="auth.logout()">Cerrar sesión</button>
+</header>
 
-<h2>Carta</h2>
-<div>
-    <input [(ngModel)]="nuevo.nombre" name="n-nombre" placeholder="Nombre">
-    <input [(ngModel)]="nuevo.descripcion" name="n-desc" placeholder="Descripción">
-    <input [(ngModel)]="nuevo.categoria" name="n-cat" placeholder="Categoría">
-    <input [(ngModel)]="nuevo.precio" name="n-precio" type="number" placeholder="Precio">
-    <input [(ngModel)]="nuevo.stock" name="n-stock" type="number" placeholder="Stock">
-    <button (click)="agregarProducto()">Agregar</button>
-    @if (errorCarta) { <p class="error">{{ errorCarta }}</p> }
-</div>
-
-<table>
-    <tr>
-        <th>Nombre</th>
-        <th>Descripción</th>
-        <th>Categoría</th>
-        <th>Precio</th>
-        <th>Stock</th>
-        <th></th>
-    </tr>
-    @for (p of productos; track p.id) {
-    <tr>
-        <td><input [(ngModel)]="p.nombre" name="nombre-{{ p.id }}"></td>
-        <td><input [(ngModel)]="p.descripcion" name="desc-{{ p.id }}"></td>
-        <td><input [(ngModel)]="p.categoria" name="cat-{{ p.id }}"></td>
-        <td><input [(ngModel)]="p.precio" name="precio-{{ p.id }}" type="number"></td>
-        <td><input [(ngModel)]="p.stock" name="stock-{{ p.id }}" type="number"></td>
-        <td>
-            <button (click)="guardarProducto(p)">Guardar</button>
-            <button (click)="eliminarProducto(p.id)">Eliminar</button>
-        </td>
-    </tr>
+@if (!seccion) {
+<main class="tablero">
+    @for (s of secciones; track s.id) {
+    <button class="tarjeta-seccion" [attr.data-seccion]="s.id" (click)="abrir(s.id)">
+        <span class="titulo">{{ s.titulo }}</span>
+        <span class="detalle">{{ s.detalle }}</span>
+    </button>
     }
-</table>
-<h2>Mesas</h2>
-<div>
-    <button (click)="agregarMesa()">Agregar mesa</button>
-    @for (m of mesas; track m.id) {
-    <span>Mesa {{ m.numero }} <button (click)="eliminarMesa(m.id)">Quitar</button></span>
-    }
-    @if (errorMesas) { <p class="error">{{ errorMesas }}</p> }
-</div>
+</main>
+} @else {
+<button class="secundario volver no-imprimir" (click)="volver()">← Volver al panel</button>
 
-<h2>Usuarios</h2>
-<div>
-    <input [(ngModel)]="nombre" name="nombre" placeholder="Nombre">
-    <input [(ngModel)]="usuario" name="usuario" placeholder="Usuario">
-    <input [(ngModel)]="clave" name="clave" type="password" placeholder="Clave">
-    <select [(ngModel)]="rol" name="rol">
-        <option value="mozo">Mozo</option>
-        <option value="cocina">Cocina</option>
-        <option value="admin">Admin</option>
-    </select>
-    <button (click)="crear()">Crear</button>
-    @if (error) { <p class="error">{{ error }}</p> }
-</div>
+@switch (seccion) {
 
-<table>
-    <tr>
-        <th>Nombre</th>
-        <th>Usuario</th>
-        <th>Rol</th>
-        <th></th>
-    </tr>
-    @for (u of usuarios; track u.id) {
-    <tr>
-        <td>{{ u.nombre }}</td>
-        <td>{{ u.usuario }}</td>
-        <td>{{ u.rol }}</td>
-        <td>
-            @if (u.rol !== 'admin') {
-            <input type="password" [(ngModel)]="clavesNuevas[u.id]" name="clave-{{ u.id }}" placeholder="Nueva clave">
-            <button (click)="cambiarClave(u.id)">Cambiar clave</button>
+@case ('carta') {
+<section>
+    <h2>Carta</h2>
+    <div class="panel">
+        <input [(ngModel)]="nuevo.nombre" name="n-nombre" placeholder="Nombre">
+        <input [(ngModel)]="nuevo.descripcion" name="n-desc" placeholder="Descripción">
+        <input [(ngModel)]="nuevo.categoria" name="n-cat" placeholder="Categoría">
+        <input [(ngModel)]="nuevo.precio" name="n-precio" type="number" placeholder="Precio">
+        <input [(ngModel)]="nuevo.stock" name="n-stock" type="number" placeholder="Stock">
+        <button (click)="agregarProducto()">Agregar</button>
+        @if (errorCarta) { <p class="error">{{ errorCarta }}</p> }
+    </div>
+
+    <div class="tabla-scroll">
+        <table>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th></th>
+            </tr>
+            @for (p of productos; track p.id) {
+            <tr>
+                <td><input [(ngModel)]="p.nombre" name="nombre-{{ p.id }}"></td>
+                <td><input [(ngModel)]="p.descripcion" name="desc-{{ p.id }}"></td>
+                <td><input [(ngModel)]="p.categoria" name="cat-{{ p.id }}"></td>
+                <td><input [(ngModel)]="p.precio" name="precio-{{ p.id }}" type="number"></td>
+                <td><input [(ngModel)]="p.stock" name="stock-{{ p.id }}" type="number"></td>
+                <td class="acciones">
+                    <button class="icono-btn" (click)="guardarProducto(p)" title="Guardar" aria-label="Guardar">💾</button>
+                    <button class="icono-btn" (click)="eliminarProducto(p.id)" title="Eliminar" aria-label="Eliminar">🗑️</button>
+                </td>
+            </tr>
             }
-            <button (click)="eliminar(u.id)">Eliminar</button>
-        </td>
-    </tr>
-    }
+        </table>
+    </div>
+</section>
+}
+
+@case ('mesas') {
+<section>
+    <h2>Mesas</h2>
+    <div class="panel">
+        <button (click)="agregarMesa()">Agregar mesa</button>
+        @for (m of mesas; track m.id) {
+        <span class="chip">
+            Mesa {{ m.numero }}
+            <button class="icono-btn" (click)="eliminarMesa(m.id)" title="Quitar mesa" aria-label="Quitar mesa">🗑️</button>
+        </span>
+        }
+        @if (errorMesas) { <p class="error">{{ errorMesas }}</p> }
+    </div>
+</section>
+}
+
+@case ('usuarios') {
+<section>
+    <h2>Usuarios</h2>
+    <div class="panel">
+        <input [(ngModel)]="nombre" name="nombre" placeholder="Nombre">
+        <input [(ngModel)]="usuario" name="usuario" placeholder="Usuario">
+        <input [(ngModel)]="clave" name="clave" type="password" placeholder="Clave">
+        <select [(ngModel)]="rol" name="rol">
+            <option value="mozo">Mozo</option>
+            <option value="cocina">Cocina</option>
+            <option value="admin">Admin</option>
+        </select>
+        <button (click)="crear()">Crear</button>
+        @if (error) { <p class="error">{{ error }}</p> }
+    </div>
+
+    <div class="tabla-scroll">
+        <table>
+            <tr>
+                <th>Nombre</th>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th></th>
+            </tr>
+            @for (u of usuarios; track u.id) {
+            <tr>
+                <td>{{ u.nombre }}</td>
+                <td>{{ u.usuario }}</td>
+                <td>{{ u.rol }}</td>
+                <td class="acciones">
+                    @if (u.rol !== 'admin') {
+                    <input type="password" [(ngModel)]="clavesNuevas[u.id]" name="clave-{{ u.id }}" placeholder="Nueva clave">
+                    <button class="icono-btn" (click)="cambiarClave(u.id)" title="Guardar nueva clave"
+                        aria-label="Guardar nueva clave">💾</button>
+                    }
+                    <button class="icono-btn" (click)="eliminar(u.id)" title="Eliminar usuario"
+                        aria-label="Eliminar usuario">🗑️</button>
+                </td>
+            </tr>
+            }
+        </table>
+    </div>
     @if (errorClave) { <p class="error">{{ errorClave }}</p> }
-</table>
+</section>
+}
+
+@case ('qr') {
+<section class="qr-seccion">
+    <h2 class="no-imprimir">QR's de las mesas</h2>
+
+    <div class="panel no-imprimir">
+        <input [(ngModel)]="urlBase" name="qr-base" placeholder="http://192.168.1.35:4200">
+        <button (click)="generarQrs()">Actualizar QR</button>
+        <button (click)="imprimirQrs()">Imprimir</button>
+        @if (urlLocal) {
+        <p class="error">Con "localhost" el QR no abre desde el celular. Poné la IP de esta PC.</p>
+        }
+    </div>
+
+    <div class="qr-grilla">
+        @for (q of qrs(); track q.mesa.id) {
+        <div class="qr-tarjeta">
+            <img [src]="q.imagen" [alt]="'QR de la mesa ' + q.mesa.numero">
+            <strong>Mesa {{ q.mesa.numero }}</strong>
+            <small>{{ q.url }}</small>
+        </div>
+        }
+    </div>
+</section>
+}
+
+}
+}

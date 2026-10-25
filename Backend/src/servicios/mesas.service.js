@@ -3,10 +3,11 @@ import { ErrorHttp } from '../utilidades/errores.js';
 import { totalDe } from '../utilidades/pedidos.js';
 import * as pedidos from './pedidos.service.js';
 
-// Todas las mesas con su estado, pedidos y total
 export async function listar() {
     const [mesas] = await pool.query('SELECT id, numero FROM mesas ORDER BY numero');
-    const [cuentas] = await pool.query("SELECT id, mesa_id AS mesaId, estado FROM cuentas WHERE estado <> 'cerrada'");
+    const [cuentas] = await pool.query(
+        "SELECT id, mesa_id AS mesaId, estado, nombre_cliente AS nombreCliente FROM cuentas WHERE estado <> 'cerrada'"
+    );
     const lista = await pedidos.porCuentas(cuentas.map(c => c.id));
 
     return mesas.map(m => {
@@ -17,6 +18,7 @@ export async function listar() {
             numero: m.numero,
             ocupada: ps.length > 0,
             cuentaPedida: cuenta?.estado === 'solicitada',
+            nombreCliente: cuenta?.nombreCliente ?? null,
             total: totalDe(ps),
             pedidos: ps,
         };

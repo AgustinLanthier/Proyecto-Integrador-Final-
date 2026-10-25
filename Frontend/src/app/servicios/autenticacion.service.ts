@@ -14,11 +14,11 @@ export class AutenticacionService {
     login(usuario: string, clave: string): Observable<LoginRespuesta> {
         return this.http
             .post<LoginRespuesta>(`${API}/auth/login`, { usuario, clave })
-            .pipe(tap(r => localStorage.setItem(this.CLAVE, JSON.stringify(r))));
+            .pipe(tap(r => sessionStorage.setItem(this.CLAVE, JSON.stringify(r))));
     }
 
     logout(): void {
-        localStorage.removeItem(this.CLAVE);
+        sessionStorage.removeItem(this.CLAVE);
         this.router.navigate(['/login']);
     }
 
@@ -61,7 +61,7 @@ export class AutenticacionService {
     }
 
     private get sesion(): LoginRespuesta | null {
-        const raw = localStorage.getItem(this.CLAVE);
+        const raw = sessionStorage.getItem(this.CLAVE);
         return raw ? JSON.parse(raw) : null;
     }
 }

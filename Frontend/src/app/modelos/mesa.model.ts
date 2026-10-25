@@ -10,6 +10,7 @@ export interface Mesa {
 
 export interface MesaApi extends Mesa {
   cuentaPedida: boolean;
+  nombreCliente: string | null;
   total: number;
   pedidos: Pedido[];
 }
@@ -19,4 +20,5 @@ export interface MesaVista {
   pedidos: Pedido[];
   total: number;
   cuentaPedida: boolean;
+  nombreCliente: string | null;
 }

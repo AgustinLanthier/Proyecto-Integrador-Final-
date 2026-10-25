@@ -1,8 +1,8 @@
 import * as servicio from '../servicios/pedidos.service.js';
 
 export async function crear(req, res) {
-    const { mesaId, items } = req.body ?? {};
-    res.status(201).json(await servicio.crear(Number(mesaId), items));
+    const { mesaId, items, nombreCliente } = req.body ?? {};
+    res.status(201).json(await servicio.crear(Number(mesaId), items, nombreCliente));
 }
 
 export async function activos(req, res) {

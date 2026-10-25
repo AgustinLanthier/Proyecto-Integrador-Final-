@@ -11,7 +11,7 @@ $fondo: $marron-bronceado;
     display: block;
     min-height: 100vh;
     padding: 1rem;
-    background: $fondo;
+    background: $fondo URL('/patron-birras.svg');
     font-family: 'Alfa Slab One', serif;
     color: $color;
 }

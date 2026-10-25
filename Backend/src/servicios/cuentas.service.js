@@ -5,19 +5,23 @@ import * as pedidos from './pedidos.service.js';
 
 async function abierta(mesaId) {
     const [f] = await pool.query(
-        "SELECT id, estado FROM cuentas WHERE mesa_id = ? AND estado <> 'cerrada' ORDER BY id DESC LIMIT 1",
+        "SELECT id, estado, nombre_cliente AS nombreCliente FROM cuentas WHERE mesa_id = ? AND estado <> 'cerrada' ORDER BY id DESC LIMIT 1",
         [mesaId]
     );
     return f[0] ?? null;
 }
 
-// Lo que ve el cliente: sus pedidos, el total y si ya pidió la cuenta
 export async function deMesa(mesaId) {
     const cuenta = await abierta(mesaId);
-    if (!cuenta) return { pedidos: [], total: 0, solicitada: false };
+    if (!cuenta) return { pedidos: [], total: 0, solicitada: false, nombreCliente: null };
 
     const lista = await pedidos.porCuentas([cuenta.id]);
-    return { pedidos: lista, total: totalDe(lista), solicitada: cuenta.estado === 'solicitada' };
+    return {
+        pedidos: lista,
+        total: totalDe(lista),
+        solicitada: cuenta.estado === 'solicitada',
+        nombreCliente: cuenta.nombreCliente,
+    };
 }
 
 export async function solicitar(mesaId) {
@@ -28,7 +32,6 @@ export async function solicitar(mesaId) {
     return deMesa(mesaId);
 }
 
-// Cierra la cuenta y devuelve el ticket con los productos agrupados
 export async function cobrar(mesaId) {
     const cuenta = await abierta(mesaId);
     if (!cuenta) throw new ErrorHttp(409, 'La mesa no tiene una cuenta abierta');
@@ -47,5 +50,12 @@ export async function cobrar(mesaId) {
 
     await pool.query("UPDATE cuentas SET estado = 'cerrada', fecha_cierre = NOW() WHERE id = ?", [cuenta.id]);
 
-    return { numero: cuenta.id, mesaId, fecha: new Date(), items, total: totalDe([{ items }]) };
+    return {
+        numero: cuenta.id,
+        mesaId,
+        nombreCliente: cuenta.nombreCliente,
+        fecha: new Date(),
+        items,
+        total: totalDe([{ items }]),
+    };
 }

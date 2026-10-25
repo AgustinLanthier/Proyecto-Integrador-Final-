@@ -16,7 +16,7 @@ $fondo: $marron-bronceado;
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: $fondo;
+  background: $fondo URL('/patron-birras.svg');
 }
 
 // ---------- Header ----------

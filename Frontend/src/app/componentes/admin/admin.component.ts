@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import * as QRCode from 'qrcode';
 import { AutenticacionService } from '../../servicios/autenticacion.service';
 import { MenuService } from '../../servicios/menu.service';
 import { MesaService } from '../../servicios/mesa.service';
@@ -7,6 +8,8 @@ import { Producto } from '../../modelos/producto.model';
 import { Mesa } from '../../modelos/mesa.model';
 import { mensajeDeError } from '../../utilidades/errores';
 
+type Seccion = 'carta' | 'mesas' | 'usuarios' | 'qr';
+
 @Component({
   selector: 'app-admin',
   standalone: false,
@@ -14,6 +17,14 @@ import { mensajeDeError } from '../../utilidades/errores';
   templateUrl: './admin.component.html',
 })
 export class AdminComponent {
+  seccion: Seccion | null = null;
+    readonly secciones: { id: Seccion;  titulo: string; detalle: string }[] = [
+    { id: 'carta', titulo: 'Carta', detalle: 'Productos, precios y stock' },
+    { id: 'mesas', titulo: 'Mesas', detalle: 'Agregar y quitar mesas' },
+    { id: 'usuarios', titulo: 'Usuarios', detalle: 'Mozos, cocina y claves' },
+    { id: 'qr', titulo: "QR's",  detalle: 'Códigos para cada mesa' },
+  ];
+
   // Usuarios
   usuarios: Usuario[] = [];
   nombre = '';
@@ -33,6 +44,10 @@ export class AdminComponent {
   nuevo: Omit<Producto, 'id'> = { nombre: '', descripcion: '', precio: 0, categoria: '', stock: 0 };
   errorCarta = '';
 
+  // QR
+  urlBase = localStorage.getItem('qr-base') || location.origin;
+  qrs = signal<{ mesa: Mesa; url: string; imagen: string }[]>([]);
+
   constructor(
     public auth: AutenticacionService,
     private menu: MenuService,
@@ -41,6 +56,14 @@ export class AdminComponent {
     this.cargarUsuarios();
     this.cargarMesas();
     this.cargarProductos();
+  }
+
+  abrir(s: Seccion): void {
+    this.seccion = s;
+  }
+
+  volver(): void {
+    this.seccion = null;
   }
 
   // ---- Usuarios ----
@@ -85,7 +108,10 @@ export class AdminComponent {
 
   // ---- Mesas ----
   private cargarMesas(): void {
-    this.mesaService.listar().subscribe(m => (this.mesas = m));
+    this.mesaService.listar().subscribe(m => {
+      this.mesas = m;
+      this.generarQrs();
+    });
   }
 
   agregarMesa(): void {
@@ -148,5 +174,29 @@ export class AdminComponent {
       next: () => (this.productos = this.productos.filter(x => x.id !== id)),
       error: e => (this.errorCarta = mensajeDeError(e)),
     });
+  }
+
+  // ---- Códigos QR ----
+  get urlLocal(): boolean {
+    return /localhost|127\.0\.0\.1/.test(this.urlBase);
+  }
+
+  async generarQrs(): Promise<void> {
+    localStorage.setItem('qr-base', this.urlBase);
+    const base = this.urlBase.trim().replace(/\/+$/, '');
+
+    this.qrs.set(
+      await Promise.all(
+        this.mesas.map(async mesa => {
+          const url = `${base}/cliente/${mesa.id}`;
+          const imagen = await QRCode.toDataURL(url, { width: 280, margin: 2, errorCorrectionLevel: 'M' });
+          return { mesa, url, imagen };
+        })
+      )
+    );
+  }
+
+  imprimirQrs(): void {
+    window.print();
   }
 }

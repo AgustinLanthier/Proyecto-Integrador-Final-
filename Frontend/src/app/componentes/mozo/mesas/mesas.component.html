@@ -11,6 +11,7 @@
                 <button class="mesa" *ngFor="let m of mesas" [class.ocupada]="m.mesa.ocupada"
                     [class.cuenta]="m.cuentaPedida" (click)="abrir(m.mesa.id)">
                     <span class="numero">{{ m.mesa.numero }}</span>
+                    <span class="estado" *ngIf="m.nombreCliente">{{ m.nombreCliente }}</span>
                     <span class="estado" *ngIf="m.cuentaPedida">🔔 Pidió la cuenta</span>
                     <span class="estado" *ngIf="!m.cuentaPedida">{{ m.mesa.ocupada ? 'Ocupada' : 'Libre' }}</span>
                     <span class="monto" *ngIf="m.mesa.ocupada">
@@ -19,12 +20,11 @@
                 </button>
             </div>
 
-            <!-- Pedido actual de la mesa elegida -->
             <ng-template #detalle>
                 <div class="detalle" *ngIf="seleccionada(mesas) as s">
                     <button class="volver" (click)="volver()">← Volver a las mesas</button>
-                    <h2>Mesa {{ s.mesa.numero }}</h2>
-
+                    <h2>Mesa {{ s.mesa.numero }}<span *ngIf="s.nombreCliente"> · {{ s.nombreCliente }}</span></h2>
+                    
                     <p class="aviso" *ngIf="s.cuentaPedida">
                         🔔 El cliente pidió la cuenta. Llevásela a la mesa y cobrá.
                     </p>
@@ -68,6 +68,7 @@
             <h2>Pinta Alce</h2>
             <p class="centro">Ticket #{{ t.numero | number:'4.0-0' }}</p>
             <p class="centro">Mesa {{ t.mesaId }} · {{ t.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p class="centro" *ngIf="t.nombreCliente">Cliente: {{ t.nombreCliente }}</p>
             <hr />
 
             <div class="linea" *ngFor="let i of t.items">

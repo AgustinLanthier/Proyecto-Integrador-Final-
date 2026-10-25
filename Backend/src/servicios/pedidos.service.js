@@ -32,7 +32,14 @@ export async function activos() {
     return agruparPedidos(filas);
 }
 
-export async function crear(mesaId, items) {
+function limpiarNombre(valor) {
+    const nombre = String(valor ?? '').trim().slice(0, 80);
+    return nombre || null;
+}
+
+export async function crear(mesaId, items, nombreCliente) {
+    const nombre = limpiarNombre(nombreCliente);
+
     if (!Number.isInteger(mesaId)) throw new ErrorHttp(400, 'Mesa inválida');
     if (!Array.isArray(items) || items.length === 0) throw new ErrorHttp(400, 'El pedido no tiene productos');
 
@@ -54,16 +61,19 @@ export async function crear(mesaId, items) {
         const [mesas] = await conn.query('SELECT id FROM mesas WHERE id = ?', [mesaId]);
         if (!mesas[0]) throw new ErrorHttp(404, 'La mesa no existe');
 
-        // Cuenta abierta de la mesa (si no hay, se crea)
+        // Cuenta abierta de la mesa (si no hay, se crea con el nombre del cliente)
         const [cuentas] = await conn.query(
-            "SELECT id, estado FROM cuentas WHERE mesa_id = ? AND estado <> 'cerrada' ORDER BY id DESC LIMIT 1 FOR UPDATE",
+            "SELECT id, estado, nombre_cliente AS nombreCliente FROM cuentas WHERE mesa_id = ? AND estado <> 'cerrada' ORDER BY id DESC LIMIT 1 FOR UPDATE",
             [mesaId]
         );
         let cuenta = cuentas[0];
         if (cuenta?.estado === 'solicitada') throw new ErrorHttp(409, 'La mesa ya pidió la cuenta');
+
         if (!cuenta) {
-            const [r] = await conn.query('INSERT INTO cuentas (mesa_id) VALUES (?)', [mesaId]);
+            const [r] = await conn.query('INSERT INTO cuentas (mesa_id, nombre_cliente) VALUES (?, ?)', [mesaId, nombre]);
             cuenta = { id: r.insertId };
+        } else if (!cuenta.nombreCliente && nombre) {
+            await conn.query('UPDATE cuentas SET nombre_cliente = ? WHERE id = ?', [nombre, cuenta.id]);
         }
 
         // Productos reales de la base: nombre, precio y stock
@@ -99,7 +109,6 @@ export async function crear(mesaId, items) {
     }
 }
 
-// pendiente -> en_preparacion -> listo -> entregado (cocina hace los dos primeros, mozo el último)
 export async function cambiarEstado(id, estado, rol) {
     const pedido = await obtener(id);
 

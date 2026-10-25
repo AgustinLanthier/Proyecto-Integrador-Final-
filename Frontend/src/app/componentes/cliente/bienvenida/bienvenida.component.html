@@ -1,0 +1,20 @@
+<div class="bienvenida">
+    <div class="tarjeta">
+        <img class="logo" src="/logo.svg" alt="Logo">
+        <h1>Pinta Alce</h1>
+
+        @if (invalida) {
+        <p class="error">El código QR no es válido. Pedile ayuda a un mozo.</p>
+        } @else {
+        <p class="subtitulo">Mesa {{ mesaId }}</p>
+
+        <label for="nombre">¿Cómo te llamás?</label>
+        <input id="nombre" [(ngModel)]="nombre" name="nombre" maxlength="40" placeholder="Tu nombre"
+            autocomplete="given-name" (ngModelChange)="error = false" (keyup.enter)="entrar()">
+
+        @if (error) { <p class="error">Escribí tu nombre para continuar</p> }
+
+        <button (click)="entrar()">Ver la carta</button>
+        }
+    </div>
+</div>
