@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AutenticacionService } from '../../servicios/autenticacion.service';
+import { mensajeDeError } from '../../utilidades/errores';
 
 @Component({
   selector: 'app-login',
@@ -13,14 +14,12 @@ export class LoginComponent {
   clave = '';
   error = '';
 
-  constructor(private auth: AutenticacionService, private router: Router) { }
+  constructor(private auth: AutenticacionService, private router: Router) {}
 
   ingresar(): void {
-    const user = this.auth.login(this.usuario, this.clave);
-    if (!user) {
-      this.error = 'Usuario o clave incorrectos';
-      return;
-    }
-    this.router.navigate([this.auth.rutaPorRol(user.rol)]);
+    this.auth.login(this.usuario, this.clave).subscribe({
+      next: r => this.router.navigate([this.auth.rutaPorRol(r.usuario.rol)]),
+      error: e => (this.error = e.status === 401 ? 'Credenciales incorrectas' : mensajeDeError(e)),
+    });
   }
 }

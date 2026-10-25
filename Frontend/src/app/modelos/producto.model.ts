@@ -5,4 +5,6 @@ export interface Producto {
     precio: number;
     categoria: string;
     stock: number;
+    imagenUrl?: string | null;
+    activo?: boolean;
 }

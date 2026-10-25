@@ -3,11 +3,12 @@
         <h1>Cuenta · Mesa {{ mesaId }}</h1>
         <a [routerLink]="['/cliente', mesaId]">Volver a la carta</a>
     </header>
+    <p class="vacio" *ngIf="error">{{ error }}</p>
+    <ng-container *ngIf="cuenta$ | async as cuenta">
+        <p class="vacio" *ngIf="cuenta.pedidos.length === 0">Todavía no pediste nada.</p>
+        <p class="vacio" *ngIf="error">{{ error }}</p>
 
-    <ng-container *ngIf="pedidos$ | async as pedidos">
-        <p class="vacio" *ngIf="pedidos.length === 0">Todavía no pediste nada.</p>
-
-        <div class="pedido" *ngFor="let p of pedidos">
+        <div class="pedido" *ngFor="let p of cuenta.pedidos">
             <div class="pedido-header">
                 <span>Pedido #{{ p.id }} · {{ p.fecha | date:'HH:mm' }}</span>
                 <span class="badge" [class]="p.estado">{{ p.estado }}</span>
@@ -22,23 +23,24 @@
                 Subtotal: {{ subtotal(p) | currency:'ARS':'symbol-narrow':'1.0-0' }}
             </div>
         </div>
+
+        <footer>
+            <div class="total">
+                <span>Total</span>
+                <strong>{{ cuenta.total | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong>
+            </div>
+
+            <p class="aviso" *ngIf="cuenta.solicitada; else boton">
+                ✔ Cuenta solicitada. El mozo ya va para tu mesa.
+            </p>
+            <ng-template #boton>
+                <button (click)="pedirCuenta()" [disabled]="cuenta.pedidos.length === 0">
+                    Pedir la cuenta
+                </button>
+            </ng-template>
+        </footer>
     </ng-container>
 
-    <footer>
-        <div class="total">
-            <span>Total</span>
-            <strong>{{ total$ | async | currency:'ARS':'symbol-narrow':'1.0-0' }}</strong>
-        </div>
-
-        <p class="aviso" *ngIf="solicitada$ | async; else boton">
-            ✔ Cuenta solicitada. El mozo ya va para tu mesa.
-        </p>
-        <ng-template #boton>
-            <button (click)="pedirCuenta()" [disabled]="(pedidos$ | async)?.length === 0">
-                Pedir la cuenta
-            </button>
-        </ng-template>
-    </footer>
     <app-modal-confirmacion [visible]="confirmando" titulo="Pedir la cuenta"
         mensaje="Un mozo te la va a llevar a la mesa." textoConfirmar="Sí, pedir cuenta" textoCancelar="Todavía no"
         (confirmar)="confirmarPedido()" (cancelar)="confirmando = false">

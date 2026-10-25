@@ -1,60 +1,38 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Observable, shareReplay, Subject, tap } from 'rxjs';
+import { API } from '../configuracion/api';
 import { Producto } from '../modelos/producto.model';
-
-const INICIAL: Producto[] = [
-    { id: 1, nombre: 'Coca-Cola 500ml', descripcion: 'Gaseosa', precio: 2500, categoria: 'Bebidas', stock: 20 },
-    { id: 2, nombre: 'Agua mineral', descripcion: 'Sin gas', precio: 1800, categoria: 'Bebidas', stock: 20 },
-    { id: 3, nombre: 'Milanesa con papas', descripcion: 'De ternera', precio: 9500, categoria: 'Platos', stock: 10 },
-    { id: 4, nombre: 'Ravioles', descripcion: 'Con salsa a elección', precio: 8800, categoria: 'Platos', stock: 10 },
-    { id: 5, nombre: 'Flan casero', descripcion: 'Con dulce de leche', precio: 4200, categoria: 'Postres', stock: 8 },
-];
+import { actualizar } from '../utilidades/actualizador';
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {
-    private readonly CLAVE = 'menu';
-    private productos$ = new BehaviorSubject<Producto[]>(this.cargar());
+    private http = inject(HttpClient);
+    private recarga$ = new Subject<void>();
 
-    readonly menu$ = this.productos$.asObservable();
+    readonly menu$ = actualizar(() => this.http.get<Producto[]>(`${API}/productos`), 5000, this.recarga$).pipe(
+        shareReplay({ bufferSize: 1, refCount: true })
+    );
 
-    hayStock(productoId: number, cantidad: number): boolean {
-        const p = this.productos$.value.find(x => x.id === productoId);
-        return !!p && p.stock >= cantidad;
-    }
-
-    descontarStock(productoId: number, cantidad: number): void {
-        this.guardar(
-            this.productos$.value.map(p =>
-                p.id === productoId ? { ...p, stock: p.stock - cantidad } : p
-            )
-        );
+    recargar(): void {
+        this.recarga$.next();
     }
 
     // ---- Admin ----
-    agregar(p: Omit<Producto, 'id'>): void {
-        const id = Math.max(0, ...this.productos$.value.map(x => x.id)) + 1;
-        this.guardar([...this.productos$.value, { ...p, id }]);
+    listar(): Observable<Producto[]> {
+        return this.http.get<Producto[]>(`${API}/productos`);
     }
 
-    actualizar(p: Producto): void {
-        this.guardar(this.productos$.value.map(x => (x.id === p.id ? { ...p } : x)));
+    agregar(p: Omit<Producto, 'id'>): Observable<Producto> {
+        return this.http.post<Producto>(`${API}/productos`, p).pipe(tap(() => this.recargar()));
     }
 
-    eliminar(id: number): void {
-        this.guardar(this.productos$.value.filter(x => x.id !== id));
+    actualizar(p: Producto): Observable<Producto> {
+        const { id, ...datos } = p;
+        return this.http.put<Producto>(`${API}/productos/${id}`, datos).pipe(tap(() => this.recargar()));
     }
 
-    private cargar(): Producto[] {
-        try {
-            const raw = localStorage.getItem(this.CLAVE);
-            return raw ? JSON.parse(raw) : INICIAL;
-        } catch {
-            return INICIAL;
-        }
-    }
-
-    private guardar(lista: Producto[]): void {
-        localStorage.setItem(this.CLAVE, JSON.stringify(lista));
-        this.productos$.next(lista);
+    eliminar(id: number): Observable<void> {
+        return this.http.delete<void>(`${API}/productos/${id}`).pipe(tap(() => this.recargar()));
     }
 }

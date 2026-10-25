@@ -1,13 +1,11 @@
 import { Component } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AutenticacionService } from '../../servicios/autenticacion.service';
 import { MenuService } from '../../servicios/menu.service';
+import { MesaService } from '../../servicios/mesa.service';
 import { Rol, Usuario } from '../../modelos/usuario.model';
 import { Producto } from '../../modelos/producto.model';
-import { MesaService } from '../../servicios/mesa.service';
-import { PedidoService } from '../../servicios/pedido.service';
 import { Mesa } from '../../modelos/mesa.model';
-
+import { mensajeDeError } from '../../utilidades/errores';
 
 @Component({
   selector: 'app-admin',
@@ -23,6 +21,8 @@ export class AdminComponent {
   clave = '';
   rol: Rol = 'mozo';
   error = '';
+  clavesNuevas: Record<number, string> = {};
+  errorClave = '';
 
   // Mesas
   mesas: Mesa[] = [];
@@ -36,18 +36,16 @@ export class AdminComponent {
   constructor(
     public auth: AutenticacionService,
     private menu: MenuService,
-    private mesaService: MesaService,
-    private pedidos: PedidoService
+    private mesaService: MesaService
   ) {
-    this.cargar();
-    this.menu.menu$.pipe(takeUntilDestroyed()).subscribe(p => (this.productos = p.map(x => ({ ...x }))));
-    this.mesaService.todas$.pipe(takeUntilDestroyed()).subscribe(m => (this.mesas = m));
+    this.cargarUsuarios();
+    this.cargarMesas();
+    this.cargarProductos();
   }
 
-  
   // ---- Usuarios ----
-  cargar(): void {
-    this.usuarios = this.auth.listarUsuarios();
+  private cargarUsuarios(): void {
+    this.auth.listarUsuarios().subscribe(u => (this.usuarios = u));
   }
 
   crear(): void {
@@ -55,52 +53,80 @@ export class AdminComponent {
       this.error = 'Completá todos los campos';
       return;
     }
-    const err = this.auth.crearUsuario(this.nombre, this.usuario, this.clave, this.rol);
-    this.error = err ?? '';
-    if (!err) {
-      this.nombre = this.usuario = this.clave = '';
-      this.cargar();
-    }
+    this.auth.crearUsuario(this.nombre, this.usuario, this.clave, this.rol).subscribe({
+      next: () => {
+        this.error = '';
+        this.nombre = this.usuario = this.clave = '';
+        this.cargarUsuarios();
+      },
+      error: e => (this.error = mensajeDeError(e)),
+    });
   }
 
   eliminar(id: number): void {
-    this.auth.eliminarUsuario(id);
-    this.cargar();
+    this.auth.eliminarUsuario(id).subscribe({
+      next: () => {
+        this.errorClave = '';
+        this.cargarUsuarios();
+      },
+      error: e => (this.errorClave = mensajeDeError(e)),
+    });
+  }
+
+  cambiarClave(id: number): void {
+    this.auth.cambiarClave(id, this.clavesNuevas[id] ?? '').subscribe({
+      next: () => {
+        this.errorClave = '';
+        this.clavesNuevas[id] = '';
+      },
+      error: e => (this.errorClave = mensajeDeError(e)),
+    });
   }
 
   // ---- Mesas ----
+  private cargarMesas(): void {
+    this.mesaService.listar().subscribe(m => (this.mesas = m));
+  }
+
   agregarMesa(): void {
-    this.mesaService.agregar();
+    this.mesaService.agregar().subscribe({
+      next: () => {
+        this.errorMesas = '';
+        this.cargarMesas();
+      },
+      error: e => (this.errorMesas = mensajeDeError(e)),
+    });
   }
+
   eliminarMesa(id: number): void {
-    if (this.pedidos.pedidosActualesDeMesa(id).length) {
-      this.errorMesas = 'La mesa tiene pedidos activos';
-      return;
-    }
-    this.errorMesas = '';
-    this.mesaService.eliminar(id);
+    this.mesaService.eliminar(id).subscribe({
+      next: () => {
+        this.errorMesas = '';
+        this.cargarMesas();
+      },
+      error: e => (this.errorMesas = mensajeDeError(e)),
+    });
   }
 
-  // Claves
-  clavesNuevas: Record<number, string> = {};
-  errorClave = '';
-
-  cambiarClave(id: number): void {
-    const err = this.auth.cambiarClave(id, this.clavesNuevas[id] ?? '');
-    this.errorClave = err ?? '';
-    if (!err) this.clavesNuevas[id] = '';
-  }
-  
   // ---- Carta ----
+  private cargarProductos(): void {
+    this.menu.listar().subscribe(p => (this.productos = p));
+  }
+
   agregarProducto(): void {
     const n = this.nuevo;
     if (!n.nombre || !n.categoria || n.precio <= 0 || n.stock < 0) {
       this.errorCarta = 'Completá nombre, categoría, precio y stock';
       return;
     }
-    this.menu.agregar(n);
-    this.nuevo = { nombre: '', descripcion: '', precio: 0, categoria: '', stock: 0 };
-    this.errorCarta = '';
+    this.menu.agregar(n).subscribe({
+      next: p => {
+        this.productos = [...this.productos, p];
+        this.nuevo = { nombre: '', descripcion: '', precio: 0, categoria: '', stock: 0 };
+        this.errorCarta = '';
+      },
+      error: e => (this.errorCarta = mensajeDeError(e)),
+    });
   }
 
   guardarProducto(p: Producto): void {
@@ -108,11 +134,19 @@ export class AdminComponent {
       this.errorCarta = 'Datos inválidos en ' + (p.nombre || 'producto');
       return;
     }
-    this.errorCarta = '';
-    this.menu.actualizar(p);
+    this.menu.actualizar(p).subscribe({
+      next: actualizado => {
+        Object.assign(p, actualizado);
+        this.errorCarta = '';
+      },
+      error: e => (this.errorCarta = mensajeDeError(e)),
+    });
   }
 
   eliminarProducto(id: number): void {
-    this.menu.eliminar(id);
+    this.menu.eliminar(id).subscribe({
+      next: () => (this.productos = this.productos.filter(x => x.id !== id)),
+      error: e => (this.errorCarta = mensajeDeError(e)),
+    });
   }
 }

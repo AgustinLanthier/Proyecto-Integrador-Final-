@@ -1,13 +1,25 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AutenticacionService } from '../servicios/autenticacion.service';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+import { API } from '../configuracion/api';
 
 export const autenticacionInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = inject(AutenticacionService).token;
+  const router = inject(Router);
+  const token = (JSON.parse(localStorage.getItem('sesion') ?? 'null') as { token?: string } | null)?.token;
 
-  if (!token) return next(req);
+  const peticion =
+    token && req.url.startsWith(API)
+      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : req;
 
-  return next(req.clone({
-    setHeaders: { Authorization: `Bearer ${token}` },
-  }));
+  return next(peticion).pipe(
+    catchError((e: HttpErrorResponse) => {
+      if (e.status === 401 && token && !req.url.endsWith('/auth/login')) {
+        localStorage.removeItem('sesion');
+        router.navigate(['/login']);
+      }
+      return throwError(() => e);
+    })
+  );
 };

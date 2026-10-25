@@ -1,19 +1,13 @@
 import { Component } from '@angular/core';
-import { combineLatest, map, Observable } from 'rxjs';
-import { Mesa } from '../../../modelos/mesa.model';
+import { Observable } from 'rxjs';
+import { MesaVista } from '../../../modelos/mesa.model';
 import { Pedido } from '../../../modelos/pedido.model';
 import { Ticket } from '../../../modelos/cuenta.model';
 import { MesaService } from '../../../servicios/mesa.service';
 import { PedidoService } from '../../../servicios/pedido.service';
 import { CuentaService } from '../../../servicios/cuenta.service';
 import { AutenticacionService } from '../../../servicios/autenticacion.service';
-
-interface MesaVista {
-  mesa: Mesa;
-  pedidos: Pedido[];
-  total: number;
-  cuentaPedida: boolean;
-}
+import { mensajeDeError } from '../../../utilidades/errores';
 
 @Component({
   selector: 'app-mesas',
@@ -26,6 +20,7 @@ export class MesasComponent {
   seleccionadaId: number | null = null;
   confirmandoMesaId: number | null = null;
   ticket: Ticket | null = null;
+  error = '';
 
   constructor(
     private mesaService: MesaService,
@@ -33,23 +28,7 @@ export class MesasComponent {
     private cuentaService: CuentaService,
     private auth: AutenticacionService
   ) {
-    this.mesas$ = combineLatest([
-      this.mesaService.todas$,
-      this.pedidoService.todos$,
-      this.cuentaService.mesasConCuentaPedida$,
-    ]).pipe(
-      map(([mesas, pedidos, pedidas]) =>
-        mesas.map((mesa): MesaVista => {
-          const ps = pedidos.filter(p => p.mesaId === mesa.id);
-          return {
-            mesa: { ...mesa, ocupada: ps.length > 0 },
-            pedidos: ps,
-            total: ps.reduce((t, p) => t + this.subtotal(p), 0),
-            cuentaPedida: pedidas.includes(mesa.id),
-          };
-        })
-      )
-    );
+    this.mesas$ = this.mesaService.mesas$;
   }
 
   seleccionada(mesas: MesaVista[]): MesaVista | undefined {
@@ -69,7 +48,13 @@ export class MesasComponent {
   }
 
   entregar(pedidoId: number): void {
-    this.pedidoService.cambiarEstado(pedidoId, 'entregado');
+    this.pedidoService.cambiarEstado(pedidoId, 'entregado').subscribe({
+      next: () => {
+        this.error = '';
+        this.mesaService.recargar();
+      },
+      error: e => (this.error = mensajeDeError(e)),
+    });
   }
 
   // Botón "A pagar": si hay pedidos sin entregar, pide confirmación con el modal
@@ -92,8 +77,15 @@ export class MesasComponent {
   }
 
   private cobrar(mesaId: number): void {
-    this.ticket = this.cuentaService.cobrar(mesaId);
-    this.seleccionadaId = null;
+    this.cuentaService.cobrar(mesaId).subscribe({
+      next: t => {
+        this.error = '';
+        this.ticket = t;
+        this.seleccionadaId = null;
+        this.mesaService.recargar();
+      },
+      error: e => (this.error = mensajeDeError(e)),
+    });
   }
 
   cerrarTicket(): void {

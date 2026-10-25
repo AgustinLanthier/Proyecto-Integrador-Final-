@@ -1,35 +1,45 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { Mesa } from '../modelos/mesa.model';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { map, Observable, Subject } from 'rxjs';
+import { API } from '../configuracion/api';
+import { Mesa, MesaApi, MesaVista } from '../modelos/mesa.model';
+import { actualizar } from '../utilidades/actualizador';
+
+const aVista = (m: MesaApi): MesaVista => ({
+  mesa: { id: m.id, numero: m.numero, ocupada: m.ocupada },
+  pedidos: m.pedidos,
+  total: m.total,
+  cuentaPedida: m.cuentaPedida,
+});
 
 @Injectable({ providedIn: 'root' })
 export class MesaService {
-  private readonly CLAVE = 'mesas';
-  private mesas$ = new BehaviorSubject<Mesa[]>(this.cargar());
+  private http = inject(HttpClient);
+  private recarga$ = new Subject<void>();
 
-  readonly todas$ = this.mesas$.asObservable();
+  // Mozo: mesas con pedidos y estado, se actualizan solas cada 3 s
+  readonly mesas$: Observable<MesaVista[]> = actualizar(
+    () => this.http.get<MesaApi[]>(`${API}/mesas`),
+    3000,
+    this.recarga$
+  ).pipe(map(ms => ms.map(aVista)));
 
-  agregar(): void {
-    const lista = this.mesas$.value;
-    const id = Math.max(0, ...lista.map(m => m.id)) + 1;
-    const numero = Math.max(0, ...lista.map(m => m.numero)) + 1;
-    this.guardar([...lista, { id, numero, ocupada: false }]);
+  recargar(): void {
+    this.recarga$.next();
   }
 
-  eliminar(id: number): void {
-    this.guardar(this.mesas$.value.filter(m => m.id !== id));
+  // ---- Admin ----
+  listar(): Observable<Mesa[]> {
+    return this.http
+      .get<MesaApi[]>(`${API}/mesas`)
+      .pipe(map(ms => ms.map(m => ({ id: m.id, numero: m.numero, ocupada: m.ocupada }))));
   }
 
-  private cargar(): Mesa[] {
-    try {
-      const raw = localStorage.getItem(this.CLAVE);
-      if (raw) return JSON.parse(raw);
-    } catch { }
-    return Array.from({ length: 10 }, (_, i) => ({ id: i + 1, numero: i + 1, ocupada: false }));
+  agregar(): Observable<Mesa> {
+    return this.http.post<Mesa>(`${API}/mesas`, {});
   }
 
-  private guardar(lista: Mesa[]): void {
-    localStorage.setItem(this.CLAVE, JSON.stringify(lista));
-    this.mesas$.next(lista);
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`${API}/mesas/${id}`);
   }
 }

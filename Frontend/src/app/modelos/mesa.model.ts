@@ -8,10 +8,15 @@ export interface Mesa {
   ocupada: boolean;
 }
 
+export interface MesaApi extends Mesa {
+  cuentaPedida: boolean;
+  total: number;
+  pedidos: Pedido[];
+}
 
 export interface MesaVista {
-  mesaId: number;
+  mesa: Mesa;
   pedidos: Pedido[];
   total: number;
-  estado: EstadoMesa;
+  cuentaPedida: boolean;
 }

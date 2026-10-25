@@ -29,6 +29,6 @@
 
     <footer *ngIf="cantidadTotal > 0">
         <span>{{ cantidadTotal }} ítems · {{ total | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
-        <button (click)="enviar()">Enviar pedido</button>
+        <button (click)="enviar()" [disabled]="enviando">Enviar pedido</button>
     </footer>
 </div>

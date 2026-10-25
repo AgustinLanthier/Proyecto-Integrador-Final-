@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+import { CuentaMesa } from '../../../modelos/cuenta.model';
 import { Pedido } from '../../../modelos/pedido.model';
-import { PedidoService } from '../../../servicios/pedido.service';
 import { CuentaService } from '../../../servicios/cuenta.service';
+import { mensajeDeError } from '../../../utilidades/errores';
 
 @Component({
   selector: 'app-cuenta',
@@ -13,35 +14,30 @@ import { CuentaService } from '../../../servicios/cuenta.service';
 })
 export class CuentaComponent implements OnInit {
   mesaId = 0;
-  pedidos$!: Observable<Pedido[]>;
-  total$!: Observable<number>;
-  solicitada$!: Observable<boolean>;
+  cuenta$!: Observable<CuentaMesa>;
   confirmando = false;
+  error = '';
 
-  constructor(
-    private route: ActivatedRoute,
-    private pedidoService: PedidoService,
-    private cuentaService: CuentaService
-  ) { }
+  constructor(private route: ActivatedRoute, private cuentaService: CuentaService) {}
 
   ngOnInit(): void {
     this.mesaId = Number(this.route.snapshot.paramMap.get('mesaId'));
-    this.pedidos$ = this.pedidoService.pedidosDeMesa$(this.mesaId);
-    this.total$ = this.pedidoService.cuentaDeMesa$(this.mesaId);
-    this.solicitada$ = this.cuentaService.solicitada$(this.mesaId);
+    this.cuenta$ = this.cuentaService.deMesa$(this.mesaId);
   }
 
   subtotal(p: Pedido): number {
     return p.items.reduce((s, i) => s + i.precioUnitario * i.cantidad, 0);
   }
 
-  // Botón "Pedir la cuenta": abre el modal
   pedirCuenta(): void {
     this.confirmando = true;
   }
 
   confirmarPedido(): void {
-    this.cuentaService.pedirCuenta(this.mesaId);
     this.confirmando = false;
+    this.cuentaService.pedirCuenta(this.mesaId).subscribe({
+      next: () => (this.error = ''),
+      error: e => (this.error = mensajeDeError(e)),
+    });
   }
 }

@@ -5,7 +5,7 @@ import { Producto } from '../../../modelos/producto.model';
 import { ItemPedido } from '../../../modelos/pedido.model';
 import { MenuService } from '../../../servicios/menu.service';
 import { PedidoService } from '../../../servicios/pedido.service';
-import { CuentaService } from '../../../servicios/cuenta.service';
+import { mensajeDeError } from '../../../utilidades/errores';
 
 @Component({
   selector: 'app-menu',
@@ -18,12 +18,12 @@ export class MenuComponent implements OnInit {
   menu$!: Observable<Producto[]>;
   carrito: ItemPedido[] = [];
   mensaje = '';
+  enviando = false;
 
   constructor(
     private route: ActivatedRoute,
     private menuService: MenuService,
-    private pedidoService: PedidoService,
-    private cuentaService: CuentaService
+    private pedidoService: PedidoService
   ) {}
 
   ngOnInit(): void {
@@ -48,12 +48,7 @@ export class MenuComponent implements OnInit {
     if (item) {
       if (item.cantidad < p.stock) item.cantidad++;
     } else if (p.stock > 0) {
-      this.carrito.push({
-        productoId: p.id,
-        nombre: p.nombre,
-        precioUnitario: p.precio,
-        cantidad: 1,
-      });
+      this.carrito.push({ productoId: p.id, nombre: p.nombre, precioUnitario: p.precio, cantidad: 1 });
     }
   }
 
@@ -75,19 +70,25 @@ export class MenuComponent implements OnInit {
   }
 
   enviar(): void {
-    if (this.cuentaService.estaSolicitada(this.mesaId)) {
-      this.mensaje = 'Ya pediste la cuenta, no se pueden agregar más pedidos.';
-      setTimeout(() => (this.mensaje = ''), 3000);
-      return;
-    }
-    if (this.carrito.length === 0) return;
-    const ok = this.pedidoService.crearPedido(this.mesaId, this.carrito);
-    if (ok) {
-      this.carrito = [];
-      this.mensaje = '¡Pedido enviado a la cocina!';
-    } else {
-      this.mensaje = 'Algún producto ya no tiene stock suficiente.';
-    }
+    if (this.carrito.length === 0 || this.enviando) return;
+    this.enviando = true;
+
+    this.pedidoService.crearPedido(this.mesaId, this.carrito).subscribe({
+      next: () => {
+        this.carrito = [];
+        this.enviando = false;
+        this.menuService.recargar();
+        this.avisar('¡Pedido enviado a la cocina!');
+      },
+      error: e => {
+        this.enviando = false;
+        this.avisar(mensajeDeError(e));
+      },
+    });
+  }
+
+  private avisar(texto: string): void {
+    this.mensaje = texto;
     setTimeout(() => (this.mensaje = ''), 3000);
   }
 }

@@ -1,4 +1,4 @@
-import { ItemPedido } from './pedido.model';
+import { ItemPedido, Pedido } from './pedido.model';
 
 export interface Ticket {
   numero: number;
@@ -6,4 +6,10 @@ export interface Ticket {
   fecha: Date;
   items: ItemPedido[];
   total: number;
+}
+
+export interface CuentaMesa {
+  pedidos: Pedido[];
+  total: number;
+  solicitada: boolean;
 }

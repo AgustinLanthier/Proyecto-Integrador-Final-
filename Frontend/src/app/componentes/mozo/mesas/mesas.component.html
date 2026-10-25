@@ -3,7 +3,7 @@
         <h1>Mesas</h1>
         <button class="salir" (click)="salir()">Salir</button>
     </header>
-
+    <p class="vacio" *ngIf="error">{{ error }}</p>
     <ng-container *ngIf="mesas$ | async as mesas">
         <main>
             <!-- Todas las mesas -->
@@ -65,7 +65,7 @@
     <!-- Ticket -->
     <div class="overlay" *ngIf="ticket as t">
         <div class="ticket">
-            <h2>Pingo</h2>
+            <h2>Pinta Alce</h2>
             <p class="centro">Ticket #{{ t.numero | number:'4.0-0' }}</p>
             <p class="centro">Mesa {{ t.mesaId }} · {{ t.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
             <hr />
