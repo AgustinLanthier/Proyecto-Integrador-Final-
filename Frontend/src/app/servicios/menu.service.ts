@@ -41,4 +41,11 @@ export class MenuService {
         datos.append('imagen', archivo);
         return this.http.post<Producto>(`${API}/productos/${id}/imagen`, datos).pipe(tap(() => this.recargar()));
     }
+    listarAdmin(): Observable<Producto[]> {
+        return this.http.get<Producto[]>(`${API}/productos/admin`);
+    }
+
+    cambiarActivo(id: number, activo: boolean): Observable<Producto> {
+        return this.http.put<Producto>(`${API}/productos/${id}`, { activo }).pipe(tap(() => this.recargar()));
+    }
 }

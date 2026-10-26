@@ -45,6 +45,7 @@ export class AdminComponent {
   errorCarta = '';
   busqueda = '';
   categoriaFiltro = 'Todas';
+  soloOcultos = false;
   mostrarFormulario = false;
   archivoNuevo: File | null = null;
   previewNueva: string | null = null;
@@ -160,8 +161,13 @@ export class AdminComponent {
     return this.productos.filter(
       p =>
         (this.categoriaFiltro === 'Todas' || p.categoria === this.categoriaFiltro) &&
+        (!this.soloOcultos || p.activo === false) &&
         (!q || p.nombre.toLowerCase().includes(q))
     );
+  }
+
+  get cantidadOcultos(): number {
+    return this.productos.filter(p => p.activo === false).length;
   }
 
   private firma(p: Producto): string {
@@ -183,7 +189,7 @@ export class AdminComponent {
   }
 
   private cargarProductos(): void {
-    this.menu.listar().subscribe(p => {
+    this.menu.listarAdmin().subscribe(p => {
       this.productos = p;
       p.forEach(x => this.originales.set(x.id, this.firma(x)));
     });
@@ -235,6 +241,7 @@ export class AdminComponent {
     });
   }
 
+  // Alta, edición y visibilidad
   agregarProducto(): void {
     const n = this.nuevo;
     n.categoria = (this.catSeleccion === this.NUEVA ? this.catNueva : this.catSeleccion).trim();
@@ -281,9 +288,23 @@ export class AdminComponent {
     });
   }
 
-  eliminarProducto(id: number): void {
-    this.menu.eliminar(id).subscribe({
-      next: () => (this.productos = this.productos.filter(x => x.id !== id)),
+  alternarActivo(p: Producto, ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    this.menu.cambiarActivo(p.id, input.checked).subscribe({
+      next: r => {
+        p.activo = r.activo;
+        this.errorCarta = '';
+      },
+      error: e => {
+        input.checked = p.activo !== false;
+        this.errorCarta = mensajeDeError(e);
+      },
+    });
+  }
+
+  eliminarProducto(p: Producto): void {
+    this.menu.eliminar(p.id).subscribe({
+      next: () => (p.activo = false),
       error: e => (this.errorCarta = mensajeDeError(e)),
     });
   }

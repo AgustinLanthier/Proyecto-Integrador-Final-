@@ -72,6 +72,9 @@
         @for (c of categorias; track c) {
         <button class="filtro" [class.activo]="categoriaFiltro === c" (click)="categoriaFiltro = c">{{ c }}</button>
         }
+        <button class="filtro" [class.activo]="soloOcultos" (click)="soloOcultos = !soloOcultos">
+            Ocultos ({{ cantidadOcultos }})
+        </button>
     </div>
 
     @if (errorCarta) { <p class="error">{{ errorCarta }}</p> }
@@ -84,11 +87,12 @@
             <span>Categoría</span>
             <span>Precio</span>
             <span>Stock</span>
+            <span>Visible</span>
             <span></span>
         </div>
 
         @for (p of productosFiltrados; track p.id) {
-        <div class="fila" [class.sin-guardar]="cambiado(p)">
+        <div class="fila" [class.sin-guardar]="cambiado(p)" [class.inactivo]="p.activo === false">
             <label class="foto" title="Cambiar foto">
                 @if (p.imagenUrl) {
                 <img [src]="p.imagenUrl" [alt]="p.nombre">
@@ -122,9 +126,16 @@
             <label class="campo"><span class="etiqueta">Stock</span>
                 <input [(ngModel)]="p.stock" name="stock-{{ p.id }}" type="number" [class.stock-bajo]="p.stock < 5">
             </label>
+            <div class="visible">
+                <span class="etiqueta">Visible</span>
+                <label class="interruptor" title="Mostrar en la carta del cliente">
+                    <input type="checkbox" [checked]="p.activo !== false" (change)="alternarActivo(p, $event)">
+                    <span class="deslizador"></span>
+                </label>
+            </div>
             <div class="acciones">
                 <button class="icono-btn guardar" (click)="guardarProducto(p)" title="Guardar" aria-label="Guardar">💾</button>
-                <button class="icono-btn" (click)="eliminarProducto(p.id)" title="Eliminar" aria-label="Eliminar">🗑️</button>
+                <button class="icono-btn" (click)="eliminarProducto(p)" title="Quitar de la carta (se puede reactivar)" aria-label="Eliminar">🗑️</button>
             </div>
         </div>
         } @empty {
