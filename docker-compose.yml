@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: restaurante
+    volumes:
+      - mysql_datos:/var/lib/mysql
+      - ./Backend/baseDatos/esquema.sql:/docker-entrypoint-initdb.d/01-esquema.sql
+      - ./Backend/src/db/migraciones/001_roles_y_carta.sql:/docker-entrypoint-initdb.d/02-roles-y-carta.sql
+      - ./Backend/src/db/migraciones/002_cuentas_token_y_cancelado.sql:/docker-entrypoint-initdb.d/03-cuentas-token.sql
+      - ./Backend/baseDatos/datos.sql:/docker-entrypoint-initdb.d/04-datos.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./Backend
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: restaurante
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./Frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_datos:
+  uploads:

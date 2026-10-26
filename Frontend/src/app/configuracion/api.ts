@@ -1,2 +1,2 @@
-export const URL_BASE = `http://${location.hostname}:3000`;
+export const URL_BASE = '';
 export const API = `${URL_BASE}/api`;
