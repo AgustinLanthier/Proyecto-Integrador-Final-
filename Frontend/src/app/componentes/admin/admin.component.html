@@ -13,47 +13,123 @@
     }
 </main>
 } @else {
-<button class="secundario volver no-imprimir" (click)="volver()">← Volver al panel</button>
 
 @switch (seccion) {
 
 @case ('carta') {
 <section>
     <h2>Carta</h2>
-    <div class="panel">
-        <input [(ngModel)]="nuevo.nombre" name="n-nombre" placeholder="Nombre">
-        <input [(ngModel)]="nuevo.descripcion" name="n-desc" placeholder="Descripción">
-        <input [(ngModel)]="nuevo.categoria" name="n-cat" placeholder="Categoría">
-        <input [(ngModel)]="nuevo.precio" name="n-precio" type="number" placeholder="Precio">
-        <input [(ngModel)]="nuevo.stock" name="n-stock" type="number" placeholder="Stock">
-        <button (click)="agregarProducto()">Agregar</button>
-        @if (errorCarta) { <p class="error">{{ errorCarta }}</p> }
+
+    <div class="barra-carta">
+        <input class="buscador" [(ngModel)]="busqueda" name="buscar" placeholder="Buscar producto">
+        <button (click)="mostrarFormulario = !mostrarFormulario">
+            {{ mostrarFormulario ? 'Cerrar' : '+ Nuevo producto' }}
+        </button>
     </div>
 
-    <div class="tabla-scroll">
-        <table>
-            <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th></th>
-            </tr>
-            @for (p of productos; track p.id) {
-            <tr>
-                <td><input [(ngModel)]="p.nombre" name="nombre-{{ p.id }}"></td>
-                <td><input [(ngModel)]="p.descripcion" name="desc-{{ p.id }}"></td>
-                <td><input [(ngModel)]="p.categoria" name="cat-{{ p.id }}"></td>
-                <td><input [(ngModel)]="p.precio" name="precio-{{ p.id }}" type="number"></td>
-                <td><input [(ngModel)]="p.stock" name="stock-{{ p.id }}" type="number"></td>
-                <td class="acciones">
-                    <button class="icono-btn" (click)="guardarProducto(p)" title="Guardar" aria-label="Guardar">💾</button>
-                    <button class="icono-btn" (click)="eliminarProducto(p.id)" title="Eliminar" aria-label="Eliminar">🗑️</button>
-                </td>
-            </tr>
-            }
-        </table>
+    @if (mostrarFormulario) {
+    <div class="panel formulario">
+        <label>Nombre
+            <input [(ngModel)]="nuevo.nombre" name="n-nombre" placeholder="Ej: Milanesa">
+        </label>
+        <label>Descripción
+            <input [(ngModel)]="nuevo.descripcion" name="n-desc" placeholder="Opcional">
+        </label>
+        <label>Categoría
+            <select [(ngModel)]="catSeleccion" name="n-cat">
+                <option value="" disabled>Elegí una categoría</option>
+                @for (c of listaCategorias; track c) {
+                <option [value]="c">{{ c }}</option>
+                }
+                <option [value]="NUEVA">+ Agregar categoría…</option>
+            </select>
+        </label>
+        @if (catSeleccion === NUEVA) {
+        <label>Nueva categoría
+            <input [(ngModel)]="catNueva" name="n-cat-nueva" placeholder="Ej: Entradas">
+        </label>
+        }
+        <label>Precio
+            <input [(ngModel)]="nuevo.precio" name="n-precio" type="number">
+        </label>
+        <label>Stock
+            <input [(ngModel)]="nuevo.stock" name="n-stock" type="number">
+        </label>
+        <label>Foto
+            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="elegirImagenNueva($event)">
+        </label>
+        @if (previewNueva) {
+        <div class="vista-previa">
+            <img [src]="previewNueva" alt="Vista previa">
+            <button class="secundario" (click)="quitarImagenNueva()">Quitar</button>
+        </div>
+        }
+        <button (click)="agregarProducto()">Agregar</button>
+    </div>
+    }
+
+    <div class="filtros">
+        @for (c of categorias; track c) {
+        <button class="filtro" [class.activo]="categoriaFiltro === c" (click)="categoriaFiltro = c">{{ c }}</button>
+        }
+    </div>
+
+    @if (errorCarta) { <p class="error">{{ errorCarta }}</p> }
+
+    <div class="lista-productos">
+        <div class="fila encabezado">
+            <span>Foto</span>
+            <span>Nombre</span>
+            <span>Descripción</span>
+            <span>Categoría</span>
+            <span>Precio</span>
+            <span>Stock</span>
+            <span></span>
+        </div>
+
+        @for (p of productosFiltrados; track p.id) {
+        <div class="fila" [class.sin-guardar]="cambiado(p)">
+            <label class="foto" title="Cambiar foto">
+                @if (p.imagenUrl) {
+                <img [src]="p.imagenUrl" [alt]="p.nombre">
+                } @else {
+                <span>Foto</span>
+                }
+                <input type="file" accept="image/jpeg,image/png,image/webp" (change)="cambiarImagen(p, $event)" hidden>
+            </label>
+            <label class="campo nombre"><span class="etiqueta">Nombre</span>
+                <input [(ngModel)]="p.nombre" name="nombre-{{ p.id }}">
+            </label>
+            <label class="campo desc"><span class="etiqueta">Descripción</span>
+                <input [(ngModel)]="p.descripcion" name="desc-{{ p.id }}">
+            </label>
+            <div class="campo">
+                <span class="etiqueta">Categoría</span>
+                <select [ngModel]="nuevaCat.has(p.id) ? NUEVA : p.categoria"
+                    (ngModelChange)="elegirCategoria(p, $event)" name="cat-{{ p.id }}">
+                    @for (c of listaCategorias; track c) {
+                    <option [value]="c">{{ c }}</option>
+                    }
+                    <option [value]="NUEVA">+ Agregar categoría…</option>
+                </select>
+                @if (nuevaCat.has(p.id)) {
+                <input [(ngModel)]="p.categoria" name="cat-nueva-{{ p.id }}" placeholder="Nueva categoría">
+                }
+            </div>
+            <label class="campo"><span class="etiqueta">Precio</span>
+                <input [(ngModel)]="p.precio" name="precio-{{ p.id }}" type="number">
+            </label>
+            <label class="campo"><span class="etiqueta">Stock</span>
+                <input [(ngModel)]="p.stock" name="stock-{{ p.id }}" type="number" [class.stock-bajo]="p.stock < 5">
+            </label>
+            <div class="acciones">
+                <button class="icono-btn guardar" (click)="guardarProducto(p)" title="Guardar" aria-label="Guardar">💾</button>
+                <button class="icono-btn" (click)="eliminarProducto(p.id)" title="Eliminar" aria-label="Eliminar">🗑️</button>
+            </div>
+        </div>
+        } @empty {
+        <p class="vacio">No hay productos para mostrar.</p>
+        }
     </div>
 </section>
 }
@@ -125,7 +201,7 @@
     <h2 class="no-imprimir">QR's de las mesas</h2>
 
     <div class="panel no-imprimir">
-        <input [(ngModel)]="urlBase" name="qr-base" placeholder="http://192.168.1.35:4200">
+        <input [(ngModel)]="urlBase" name="qr-base" placeholder="http://192.168.1.35">
         <button (click)="generarQrs()">Actualizar QR</button>
         <button (click)="imprimirQrs()">Imprimir</button>
         @if (urlLocal) {
@@ -146,4 +222,5 @@
 }
 
 }
+<button class="secundario volver no-imprimir" (click)="volver()">← Volver al panel</button>
 }

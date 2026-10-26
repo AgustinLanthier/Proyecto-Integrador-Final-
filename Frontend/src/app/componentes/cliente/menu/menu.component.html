@@ -12,6 +12,10 @@
                 <h2>{{ cat }}</h2>
 
                 <div class="producto" *ngFor="let p of porCategoria(productos, cat)">
+                    <div class="foto" [class.sin-stock]="p.stock === 0">
+                        <img *ngIf="p.imagenUrl" [src]="p.imagenUrl" [alt]="p.nombre" loading="lazy">
+                    </div>
+
                     <div class="info">
                         <strong>{{ p.nombre }}</strong>
                         <span class="desc">{{ p.descripcion }}</span>

@@ -35,4 +35,10 @@ export class MenuService {
     eliminar(id: number): Observable<void> {
         return this.http.delete<void>(`${API}/productos/${id}`).pipe(tap(() => this.recargar()));
     }
+    
+    subirImagen(id: number, archivo: File): Observable<Producto> {
+        const datos = new FormData();
+        datos.append('imagen', archivo);
+        return this.http.post<Producto>(`${API}/productos/${id}/imagen`, datos).pipe(tap(() => this.recargar()));
+    }
 }
